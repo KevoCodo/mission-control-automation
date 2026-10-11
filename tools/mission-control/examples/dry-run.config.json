@@ -1,0 +1,42 @@
+{
+  "repository": {
+    "owner": "KevoCodo",
+    "name": "ai-delivery-lab",
+    "defaultBranch": "main"
+  },
+  "project": {
+    "id": "ai-delivery-lab"
+  },
+  "worktreeRoot": "E:\\AI-Development\\ao-data\\data\\worktrees\\ai-delivery-lab",
+  "executionMode": "dry-run",
+  "deploy": false,
+  "limits": {
+    "maxBuilders": 2,
+    "correctionAttempts": 2,
+    "maxRetries": 1,
+    "maxAiUsage": 100000
+  },
+  "identities": {
+    "issues": [
+      {
+        "id": 4,
+        "number": 4,
+        "title": "Controller Project Skeleton"
+      }
+    ],
+    "sessions": [
+      {
+        "id": "ai-delivery-lab-3",
+        "branch": "ao/issue-4-controller-skeleton",
+        "worktreePath": "E:\\AI-Development\\ao-data\\data\\worktrees\\ai-delivery-lab\\ai-delivery-lab-3"
+      }
+    ],
+    "pullRequests": [
+      {
+        "id": "pending-issue-4",
+        "number": 0,
+        "branch": "ao/issue-4-controller-skeleton"
+      }
+    ]
+  }
+}

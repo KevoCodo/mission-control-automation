@@ -10,8 +10,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:controller": "tsc -p tools/mission-control/tsconfig.json",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:controller": "vitest run tools/mission-control --environment node",
     "test:watch": "vitest"
   },
   "dependencies": {

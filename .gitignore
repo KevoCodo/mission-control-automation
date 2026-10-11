@@ -1,6 +1,8 @@
 node_modules/
 dist/
 coverage/
+*.tsbuildinfo
+.mission-control/
 .env
 .env.*
 !.env.example
