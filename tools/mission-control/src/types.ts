@@ -1,4 +1,5 @@
-export const STATE_VERSION = 1;
+export const STATE_VERSION = 2;
+export const MIN_SUPPORTED_STATE_VERSION = 1;
 
 export type ExecutionMode = 'dry-run';
 
@@ -34,6 +35,37 @@ export interface IdentityMap {
   issues: IssueIdentity[];
   sessions: SessionIdentity[];
   pullRequests: PullRequestIdentity[];
+}
+
+export type OperationStatus = 'pending' | 'succeeded' | 'failed' | 'uncertain';
+
+export interface OperationIntent {
+  key: string;
+  action: 'assign-issue' | 'create-pr' | 'merge-pr' | 'discover' | string;
+  targetType: 'issue' | 'session' | 'pullRequest' | 'repository' | string;
+  targetId: string | number;
+  payload?: unknown;
+}
+
+export interface OperationOutcome {
+  provider: 'github' | 'ao' | 'controller' | string;
+  externalId?: string | number;
+  data?: unknown;
+}
+
+export interface OperationRecord {
+  intent: OperationIntent;
+  status: OperationStatus;
+  attempts: number;
+  createdAt: string;
+  updatedAt: string;
+  outcome?: OperationOutcome;
+  lastError?: string;
+}
+
+export interface StateSchemaMetadata {
+  createdVersion: number;
+  previousVersion?: number;
 }
 
 export interface ControllerLimits {
@@ -80,13 +112,16 @@ export interface DiscoveryResult {
   issues: DiscoveryIssue[];
   sessions: DiscoverySession[];
   pullRequests: DiscoveryPullRequest[];
+  dependencyGraph?: unknown;
 }
 
 export interface ControllerState {
   version: typeof STATE_VERSION;
+  schema: StateSchemaMetadata;
   repository: RepositoryIdentity;
   project: ProjectIdentity;
   identities: IdentityMap;
+  operations: OperationRecord[];
   discoveries: DiscoveryResult[];
   updatedAt: string;
 }

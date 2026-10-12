@@ -47,6 +47,32 @@ rename. Unsupported versions and corrupt JSON are rejected clearly. Audit events
 are append-only JSONL records with structured data redacted for common secret
 shapes before persistence.
 
+Audit append and recovery callers use the same controller-first ownership
+protocol. Public audit helpers acquire controller ownership themselves when the
+caller does not already hold it, and reuse caller-held ownership when invoked
+inside a controller transaction. After controller ownership is established,
+audit operations also enter a narrow process-local audit transaction queue so
+sibling append/recovery promises inside one controller callback cannot
+interleave read-modify-write repair work. Audit recovery reads, parses,
+validates, writes the repaired candidate, copies original bytes to quarantine
+evidence, and publishes the repaired canonical file while holding that audit
+transaction.
+
+## Controller Ownership
+
+State-changing controller work is guarded by one canonical repository-level
+lock at `.mission-control/controller.lock`. On Windows x64/arm64, Mission
+Control opens this file with `CreateFileW` share mode `0` through Koffi, keeps
+the native handle in process memory, and relies on Windows to close the handle
+when the owner process exits. The lock file is persistent and is not deleted to
+release ownership.
+
+Unsupported platforms, unsupported architectures, native binding load failures,
+ownership contention, and uncertain ownership fail closed before provider
+callbacks or state/audit mutations run. There is no TTL, PID, or stale-lock
+takeover fallback in production; operators should restart the owning controller
+process rather than edit lock sidecars.
+
 ## Windows Restrictions
 
 Controller worktrees are constrained to `E:` roots. The skeleton does not build

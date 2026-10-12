@@ -5,6 +5,7 @@ import { appendAuditEvent } from './audit.js';
 import { createFixtureClients } from './clients.js';
 import { ConfigError, loadConfig } from './config.js';
 import { DiscoveryError, discover } from './discovery.js';
+import { getDefaultControllerLockPath, withControllerOwnership } from './locks.js';
 import { appendDiscovery } from './state.js';
 
 const HELP = `Mission Control
@@ -51,15 +52,17 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
     }
 
     const config = await loadConfig(args.configPath);
-    const result = await discover(config, createFixtureClients(config));
-    await appendDiscovery(args.statePath, config, result);
-    await appendAuditEvent(args.auditPath, {
-      type: 'discovery.completed',
-      timestamp: new Date().toISOString(),
-      data: result
+    return await withControllerOwnership({ owner: 'mission-control-cli', lockPath: getDefaultControllerLockPath() }, async () => {
+      const result = await discover(config, createFixtureClients(config));
+      await appendDiscovery(args.statePath, config, result);
+      await appendAuditEvent(args.auditPath, {
+        type: 'discovery.completed',
+        timestamp: new Date().toISOString(),
+        data: result
+      });
+      process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+      return 0;
     });
-    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
-    return 0;
   } catch (error) {
     const prefix = error instanceof ConfigError || error instanceof DiscoveryError ? error.name : 'MissionControlError';
     process.stderr.write(`${prefix}: ${error instanceof Error ? error.message : String(error)}\n`);
