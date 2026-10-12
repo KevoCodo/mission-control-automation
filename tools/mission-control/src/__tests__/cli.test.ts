@@ -36,6 +36,7 @@ describe('mission-control cli', () => {
 
     expect(stdout).toHaveBeenCalledWith(expect.stringContaining('"mode": "dry-run"'));
     await expect(readFile(statePath, 'utf8')).resolves.toContain('"discoveries"');
+    await expect(readFile(statePath, 'utf8')).resolves.toContain('"dependencyGraph"');
     await expect(readFile(auditPath, 'utf8')).resolves.toContain('discovery.completed');
   });
 

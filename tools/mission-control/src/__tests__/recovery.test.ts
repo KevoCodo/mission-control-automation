@@ -15,6 +15,7 @@ import {
   recordOperationOutcome,
   releaseControllerLock
 } from '../recovery.js';
+import type { DependencyGraph } from '../types.js';
 
 let tempDirectory: string;
 const fixturePath = path.resolve('tools/mission-control/src/__tests__/fixtures/win32-lock-owner.mjs');
@@ -290,7 +291,7 @@ describe('recovery and idempotency foundations', () => {
         issues: [],
         sessions: [],
         pullRequests: [],
-        dependencyGraph: { nodes: ['issue-6'] }
+        dependencyGraph: fixtureGraph()
       }),
       recordOperationIntent(statePath, defaultConfig, {
         key,
@@ -302,8 +303,41 @@ describe('recovery and idempotency foundations', () => {
 
     const state = await readState(statePath);
     expect(state.discoveries).toHaveLength(1);
-    expect(state.discoveries[0].dependencyGraph).toEqual({ nodes: ['issue-6'] });
+    expect(state.discoveries[0].dependencyGraph).toEqual(fixtureGraph());
     expect(state.operations).toMatchObject([{ intent: { key } }]);
+  });
+
+  it('reconciles pending operations without rewriting persisted dependency graphs', async () => {
+    const statePath = path.join(tempDirectory, 'state.json');
+    const key = createOperationKey({ action: 'discover', targetType: 'repository', targetId: 'ai-delivery-lab' });
+
+    await appendDiscovery(statePath, defaultConfig, {
+      mode: 'dry-run',
+      repository: 'KevoCodo/ai-delivery-lab',
+      project: 'ai-delivery-lab',
+      issues: [],
+      sessions: [],
+      pullRequests: [],
+      dependencyGraph: fixtureGraph()
+    });
+    await recordOperationIntent(statePath, defaultConfig, {
+      key,
+      action: 'discover',
+      targetType: 'repository',
+      targetId: 'ai-delivery-lab'
+    });
+
+    await reconcilePendingOperations(statePath, async () => ({
+      status: 'succeeded',
+      outcome: { provider: 'controller', data: { graphOrder: fixtureGraph().order } }
+    }));
+
+    const state = await readState(statePath);
+    expect(state.discoveries[0].dependencyGraph).toEqual(fixtureGraph());
+    expect(state.operations[0]).toMatchObject({
+      status: 'succeeded',
+      outcome: { provider: 'controller' }
+    });
   });
 
   it('does not hold the state lock while slow reconciliation probes run', async () => {
@@ -392,6 +426,31 @@ function createDeferred<T>() {
     resolve = resolver;
   });
   return { promise, resolve };
+}
+
+function fixtureGraph(): DependencyGraph {
+  return {
+    repository: 'KevoCodo/ai-delivery-lab',
+    epicIssueNumber: 4,
+    nodes: [
+      {
+        id: 4,
+        owner: 'KevoCodo',
+        name: 'ai-delivery-lab',
+        number: 4,
+        title: 'Issue 4',
+        state: 'closed',
+        completionStatus: 'complete',
+        dependencies: [],
+        blocked: false,
+        eligible: true
+      }
+    ],
+    order: [4],
+    open: [],
+    blocked: [],
+    unverified: []
+  };
 }
 
 async function readChildJson(child: ChildProcessWithoutNullStreams): Promise<Record<string, unknown>> {

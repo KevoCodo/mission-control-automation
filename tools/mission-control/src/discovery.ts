@@ -1,4 +1,6 @@
+import { listTrustedEpicChildren } from './clients.js';
 import type { ControllerClients } from './clients.js';
+import { buildDependencyGraph } from './graph.js';
 import type { ControllerConfig, DiscoveryResult } from './types.js';
 
 export class DiscoveryError extends Error {
@@ -19,6 +21,13 @@ export async function discover(config: ControllerConfig, clients: ControllerClie
     const pullRequests = await Promise.all(
       config.identities.pullRequests.map((identity) => clients.github.getPullRequest(identity))
     );
+    const epicIssue = config.identities.issues[0];
+    const epicChildren = clients.github.listEpicChildren
+      ? await listTrustedEpicChildren(clients.github, {
+          repository: config.repository,
+          epicIssue
+        })
+      : [];
 
     return {
       mode: 'dry-run',
@@ -26,7 +35,15 @@ export async function discover(config: ControllerConfig, clients: ControllerClie
       project: config.project.id,
       issues,
       sessions,
-      pullRequests
+      pullRequests,
+      dependencyGraph:
+        epicChildren.length > 0
+          ? buildDependencyGraph({
+              repository: config.repository,
+              epicIssueNumber: epicIssue.number,
+              issues: epicChildren
+            })
+          : undefined
     };
   } catch (error) {
     throw new DiscoveryError(`Dry-run discovery failed: ${error instanceof Error ? error.message : String(error)}`, {

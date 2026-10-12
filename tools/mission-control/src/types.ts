@@ -90,6 +90,9 @@ export interface DiscoveryIssue {
   number: number;
   title: string;
   state: string;
+  body?: string;
+  completionVerified?: boolean;
+  nativeDependencies?: IssueDependencyReference[];
 }
 
 export interface DiscoverySession {
@@ -112,7 +115,7 @@ export interface DiscoveryResult {
   issues: DiscoveryIssue[];
   sessions: DiscoverySession[];
   pullRequests: DiscoveryPullRequest[];
-  dependencyGraph?: unknown;
+  dependencyGraph?: DependencyGraph;
 }
 
 export interface ControllerState {
@@ -124,4 +127,36 @@ export interface ControllerState {
   operations: OperationRecord[];
   discoveries: DiscoveryResult[];
   updatedAt: string;
+}
+
+export interface IssueDependencyReference {
+  owner: string;
+  name: string;
+  number: number;
+  source: 'body' | 'native';
+}
+
+export type IssueCompletionStatus = 'open' | 'closed-unverified' | 'complete';
+
+export interface DependencyGraphNode {
+  id: string | number;
+  owner: string;
+  name: string;
+  number: number;
+  title: string;
+  state: string;
+  completionStatus: IssueCompletionStatus;
+  dependencies: IssueDependencyReference[];
+  blocked: boolean;
+  eligible: boolean;
+}
+
+export interface DependencyGraph {
+  repository: string;
+  epicIssueNumber: number;
+  nodes: DependencyGraphNode[];
+  order: number[];
+  open: number[];
+  blocked: number[];
+  unverified: number[];
 }

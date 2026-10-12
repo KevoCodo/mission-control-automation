@@ -40,6 +40,20 @@ must come from that environment rather than config files. Agent review is useful
 for finding defects; it is not a substitute for required GitHub approval or
 human/policy authorization before merge.
 
+## GitHub Dependency Discovery
+
+Epic child discovery is available only through an allowlisted GitHub adapter.
+The controller reads paginated Epic children, parses explicit issue-number
+dependencies from native metadata and documented body references, and builds a
+deterministic graph without creating or mutating issues. Dependencies must point
+to actual issues in the configured repository; cycles, duplicates, missing
+dependencies, cross-repository references, and mismatched native/body dependency
+sets are rejected.
+
+Graph nodes distinguish open issues, closed issues with verified completion, and
+closed-but-unverified issues. A node is eligible only when every dependency is
+verified complete.
+
 ## State And Audit
 
 State is versioned JSON written atomically by same-directory temporary write and

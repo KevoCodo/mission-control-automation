@@ -32,6 +32,9 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Build controller
+        run: npm run build:controller
+
       - name: Build
         run: npm run build
 

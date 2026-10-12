@@ -16,6 +16,7 @@ import {
   readState,
   writeStateAtomic
 } from '../state.js';
+import type { DependencyGraph } from '../types.js';
 
 let tempDirectory: string;
 
@@ -55,6 +56,17 @@ describe('controller state', () => {
     expect(state.discoveries).toHaveLength(1);
   });
 
+  it('persists typed dependency graphs through state append and readback', async () => {
+    const filePath = path.join(tempDirectory, 'state.json');
+    const discovery = await discover(defaultConfig, createFixtureClients(defaultConfig));
+
+    const state = await appendDiscovery(filePath, defaultConfig, discovery, new Date('2026-01-01T00:00:00.000Z'));
+    const persisted = await readState(filePath);
+
+    expect(state.discoveries[0].dependencyGraph).toEqual(fixtureGraph());
+    expect(persisted.discoveries[0].dependencyGraph).toEqual(fixtureGraph());
+  });
+
   it('rejects corrupt state', async () => {
     const filePath = path.join(tempDirectory, 'state.json');
     await writeStateAtomic(filePath, createInitialState(defaultConfig));
@@ -77,13 +89,23 @@ describe('controller state', () => {
     expect(() => parseState({ ...createInitialState(defaultConfig), version: 999 })).toThrow(/Unsupported/);
   });
 
-  it('migrates version one state with recovery fields', () => {
+  it('migrates version one state with recovery fields and graph discoveries preserved', () => {
     const versionOneState = {
       version: 1,
       repository: defaultConfig.repository,
       project: defaultConfig.project,
       identities: defaultConfig.identities,
-      discoveries: [],
+      discoveries: [
+        {
+          mode: 'dry-run',
+          repository: 'KevoCodo/ai-delivery-lab',
+          project: 'ai-delivery-lab',
+          issues: [],
+          sessions: [],
+          pullRequests: [],
+          dependencyGraph: fixtureGraph()
+        }
+      ],
       updatedAt: '2026-01-01T00:00:00.000Z'
     };
 
@@ -92,6 +114,7 @@ describe('controller state', () => {
     expect(migrated.version).toBe(2);
     expect(migrated.schema.previousVersion).toBe(1);
     expect(migrated.operations).toEqual([]);
+    expect(migrated.discoveries[0].dependencyGraph).toEqual(fixtureGraph());
   });
 });
 
@@ -331,4 +354,29 @@ function createDeferred<T>() {
     resolve = resolver;
   });
   return { promise, resolve };
+}
+
+function fixtureGraph(): DependencyGraph {
+  return {
+    repository: 'KevoCodo/ai-delivery-lab',
+    epicIssueNumber: 4,
+    nodes: [
+      {
+        id: 4,
+        owner: 'KevoCodo',
+        name: 'ai-delivery-lab',
+        number: 4,
+        title: 'Controller Project Skeleton',
+        state: 'closed',
+        completionStatus: 'complete',
+        dependencies: [],
+        blocked: false,
+        eligible: true
+      }
+    ],
+    order: [4],
+    open: [],
+    blocked: [],
+    unverified: []
+  };
 }
