@@ -3,9 +3,11 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { appendAuditEvent } from './audit.js';
 import { createFixtureClients } from './clients.js';
+import { createAoCliClient } from './aoCliClient.js';
 import { ConfigError, loadConfig } from './config.js';
 import { DiscoveryError, discover } from './discovery.js';
 import { getDefaultControllerLockPath, withControllerOwnership } from './locks.js';
+import { planAssignments } from './planner.js';
 import { appendDiscovery } from './state.js';
 
 const HELP = `Mission Control
@@ -13,9 +15,11 @@ const HELP = `Mission Control
 Usage:
   mission-control --help
   mission-control discover [--config <path>] [--state <path>] [--audit <path>]
+  mission-control plan-assignments [--config <path>] [--state <path>]
 
 Commands:
   discover  Run read-only dry-run discovery using fixture adapters by default.
+  plan-assignments  Print eligible, blocked, and capacity using state plus AO session status.
 
 Options:
   --config <path>  JSON config path. Defaults to safe dry-run config.
@@ -46,13 +50,22 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
       process.stdout.write(HELP);
       return 0;
     }
-    if (args.command !== 'discover') {
+    if (args.command !== 'discover' && args.command !== 'plan-assignments') {
       process.stderr.write(`Unsupported command: ${args.command}\n`);
       return 1;
     }
 
     const config = await loadConfig(args.configPath);
     return await withControllerOwnership({ owner: 'mission-control-cli', lockPath: getDefaultControllerLockPath() }, async () => {
+      if (args.command === 'plan-assignments') {
+        const result = await planAssignments(args.statePath, config, {
+          github: createFixtureClients(config).github,
+          ao: createAoCliClient()
+        });
+        process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+        return 0;
+      }
+
       const result = await discover(config, createFixtureClients(config));
       await appendDiscovery(args.statePath, config, result);
       await appendAuditEvent(args.auditPath, {

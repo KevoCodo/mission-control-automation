@@ -33,8 +33,48 @@ export interface GithubClient {
   listEpicChildren?(request: GithubIssueDiscoveryRequest): AsyncIterable<GithubIssueDiscoveryPage>;
 }
 
+export const TRUSTED_AO_ADAPTERS = ['fixture-ao-client', 'ao-cli-client'] as const;
+export type TrustedAoAdapterName = (typeof TRUSTED_AO_ADAPTERS)[number];
+
+export interface AoCapabilityReport {
+  adapterName: string;
+  version: string;
+  commands: {
+    spawn: boolean;
+    session: boolean;
+    report: boolean;
+  };
+}
+
+export interface AoSpawnWorkerRequest {
+  projectId: string;
+  issueNumber: number;
+  branch: string;
+  worktreePath: string;
+  prompt: string;
+  maxAiUsage: number;
+  dryRun: boolean;
+}
+
+export interface AoSpawnWorkerResult {
+  sessionId?: string;
+  branch?: string;
+  worktreePath?: string;
+  uncertain?: boolean;
+}
+
+export interface AoSessionQuery {
+  issueNumber?: number;
+  branch?: string;
+}
+
 export interface AoClient {
+  adapterName?: string;
+  getCapabilities?(): Promise<AoCapabilityReport>;
   getSession(identity: SessionIdentity): Promise<DiscoverySession>;
+  listSessions?(query?: AoSessionQuery): Promise<SessionIdentity[]>;
+  spawnWorker?(request: AoSpawnWorkerRequest): Promise<AoSpawnWorkerResult>;
+  report?(message: string): Promise<void>;
 }
 
 export interface ControllerClients {
@@ -96,6 +136,19 @@ export function createFixtureClients(config: ControllerConfig, calls: ReadOnlyCa
       }
     },
     ao: {
+      adapterName: 'fixture-ao-client',
+      async getCapabilities() {
+        calls.aoReads.push('capabilities');
+        return {
+          adapterName: 'fixture-ao-client',
+          version: 'fixture',
+          commands: {
+            spawn: true,
+            session: true,
+            report: true
+          }
+        };
+      },
       async getSession(identity) {
         calls.aoReads.push(`session:${identity.id}`);
         return {
@@ -103,6 +156,14 @@ export function createFixtureClients(config: ControllerConfig, calls: ReadOnlyCa
           branch: identity.branch,
           status: config.executionMode
         };
+      },
+      async listSessions(query) {
+        calls.aoReads.push(`sessions:${query?.issueNumber ?? query?.branch ?? 'all'}`);
+        return config.identities.sessions.filter(
+          (session) =>
+            (query?.issueNumber === undefined || session.issueNumber === query.issueNumber) &&
+            (query?.branch === undefined || session.branch === query.branch)
+        );
       }
     }
   };
@@ -120,6 +181,12 @@ export function createCallLog(): ReadOnlyCallLog {
 export function assertTrustedGithubAdapter(adapterName: string | undefined): asserts adapterName is TrustedGithubAdapterName {
   if (!adapterName || !TRUSTED_GITHUB_ADAPTERS.includes(adapterName as TrustedGithubAdapterName)) {
     throw new Error(`Untrusted GitHub adapter: ${adapterName ?? 'unknown'}.`);
+  }
+}
+
+export function assertTrustedAoAdapter(adapterName: string | undefined): asserts adapterName is TrustedAoAdapterName {
+  if (!adapterName || !TRUSTED_AO_ADAPTERS.includes(adapterName as TrustedAoAdapterName)) {
+    throw new Error(`Untrusted AO adapter: ${adapterName ?? 'unknown'}.`);
   }
 }
 

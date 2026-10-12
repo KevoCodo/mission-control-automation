@@ -2,6 +2,7 @@ export const STATE_VERSION = 2;
 export const MIN_SUPPORTED_STATE_VERSION = 1;
 
 export type ExecutionMode = 'dry-run';
+export type AssignmentMode = 'dry-run' | 'live';
 
 export interface RepositoryIdentity {
   owner: string;
@@ -23,6 +24,7 @@ export interface SessionIdentity {
   id: string;
   branch: string;
   worktreePath: string;
+  issueNumber?: number;
 }
 
 export interface PullRequestIdentity {
