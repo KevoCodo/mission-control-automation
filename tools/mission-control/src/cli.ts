@@ -9,6 +9,7 @@ import { DiscoveryError, discover } from './discovery.js';
 import { getDefaultControllerLockPath, withControllerOwnership } from './locks.js';
 import { planAssignments } from './planner.js';
 import { PullRequestTrackingError, trackPullRequestChecks } from './prTracking.js';
+import { collectNativeReviewEvidence, NativeReviewEvidenceError } from './reviewEvidence.js';
 import { appendDiscovery } from './state.js';
 
 const HELP = `Mission Control
@@ -18,11 +19,13 @@ Usage:
   mission-control discover [--config <path>] [--state <path>] [--audit <path>]
   mission-control plan-assignments [--config <path>] [--state <path>]
   mission-control track-pr [--config <path>] [--state <path>] [--audit <path>] [--issue <number>] [--session <id>] [--branch <name>] [--head <sha>]
+  mission-control review-evidence [--config <path>] [--state <path>] [--audit <path>] [--issue <number>] [--session <id>] [--branch <name>] [--head <sha>] [--authorize-review] [--authorize-correction]
 
 Commands:
   discover  Run read-only dry-run discovery using fixture adapters by default.
   plan-assignments  Print eligible, blocked, and capacity using state plus AO session status.
   track-pr  Print and persist read-only PR/CI status for an intended issue/session/branch.
+  review-evidence  Print and persist read-only AO native review evidence for an exact PR head.
 
 Options:
   --config <path>  JSON config path. Defaults to safe dry-run config.
@@ -32,6 +35,8 @@ Options:
   --session <id>   AO session id for track-pr. Defaults to first configured session.
   --branch <name>  Feature branch for track-pr. Defaults to selected session branch.
   --head <sha>     Expected PR head SHA for exact-head validation.
+  --authorize-review  Record that a human explicitly authorized a future live native review trigger.
+  --authorize-correction  Record that a human authorized the next planner-only correction cycle.
   --help           Show this help.
 `;
 
@@ -44,6 +49,8 @@ interface CliArgs {
   sessionId?: string;
   branch?: string;
   expectedHeadSha?: string;
+  authorizeReview: boolean;
+  authorizeCorrection: boolean;
   help: boolean;
 }
 
@@ -61,7 +68,7 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
       process.stdout.write(HELP);
       return 0;
     }
-    if (args.command !== 'discover' && args.command !== 'plan-assignments' && args.command !== 'track-pr') {
+    if (args.command !== 'discover' && args.command !== 'plan-assignments' && args.command !== 'track-pr' && args.command !== 'review-evidence') {
       process.stderr.write(`Unsupported command: ${args.command}\n`);
       return 1;
     }
@@ -104,6 +111,36 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
         process.stdout.write(`${JSON.stringify(result.observation, null, 2)}\n`);
         return 0;
       }
+      if (args.command === 'review-evidence') {
+        const issue = args.issueNumber ?? config.identities.issues[0]?.number;
+        const session = args.sessionId
+          ? config.identities.sessions.find((identity) => identity.id === args.sessionId)
+          : config.identities.sessions[0];
+        if (issue === undefined || !session) {
+          process.stderr.write('MissionControlError: review-evidence requires configured issue and session identities.\n');
+          return 1;
+        }
+        const result = await collectNativeReviewEvidence(
+          args.statePath,
+          config,
+          createFixtureClients(config),
+          {
+            issueNumber: issue,
+            sessionId: session.id,
+            branch: args.branch ?? session.branch,
+            expectedHeadSha: args.expectedHeadSha,
+            triggerAuthorized: args.authorizeReview,
+            correctionAuthorized: args.authorizeCorrection
+          }
+        );
+        await appendAuditEvent(args.auditPath, {
+          type: 'nativeReview.completed',
+          timestamp: new Date().toISOString(),
+          data: result.observation
+        });
+        process.stdout.write(`${JSON.stringify(result.observation, null, 2)}\n`);
+        return 0;
+      }
 
       const result = await discover(config, createFixtureClients(config));
       await appendDiscovery(args.statePath, config, result);
@@ -117,7 +154,10 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
     });
   } catch (error) {
     const prefix =
-      error instanceof ConfigError || error instanceof DiscoveryError || error instanceof PullRequestTrackingError
+      error instanceof ConfigError ||
+      error instanceof DiscoveryError ||
+      error instanceof PullRequestTrackingError ||
+      error instanceof NativeReviewEvidenceError
         ? error.name
         : 'MissionControlError';
     process.stderr.write(`${prefix}: ${error instanceof Error ? error.message : String(error)}\n`);
@@ -129,6 +169,8 @@ export function parseArgs(argv: string[]): CliArgs {
   const args: CliArgs = {
     statePath: path.join('.mission-control', 'state.json'),
     auditPath: path.join('.mission-control', 'audit.jsonl'),
+    authorizeReview: false,
+    authorizeCorrection: false,
     help: false
   };
 
@@ -150,6 +192,10 @@ export function parseArgs(argv: string[]): CliArgs {
       args.branch = readOptionValue(argv, ++index, '--branch');
     } else if (arg === '--head') {
       args.expectedHeadSha = readOptionValue(argv, ++index, '--head');
+    } else if (arg === '--authorize-review') {
+      args.authorizeReview = true;
+    } else if (arg === '--authorize-correction') {
+      args.authorizeCorrection = true;
     } else if (!args.command) {
       args.command = arg;
     } else {

@@ -8,6 +8,12 @@ import type {
   PullRequestIdentity,
   PullRequestCheckRun,
   PullRequestDetails,
+  NativeReviewFinding,
+  NativeReviewReviewerIdentity,
+  NativeReviewRunStatus,
+  NativeReviewVerdict,
+  GithubRequiredApprovalStatus,
+  NativeReviewThread,
   RepositoryIdentity,
   RequiredCheckDiscovery,
   SessionIdentity
@@ -38,6 +44,8 @@ export interface GithubClient {
   getPullRequestDetails?(identity: PullRequestIdentity): Promise<PullRequestDetails>;
   listPullRequestChecks?(request: GithubPullRequestChecksRequest): AsyncIterable<GithubPullRequestChecksPage>;
   getRequiredChecks?(request: GithubRequiredChecksRequest): Promise<RequiredCheckDiscovery>;
+  listPullRequestReviewFindings?(request: GithubPullRequestReviewRequest): Promise<{ findings: NativeReviewFinding[]; complete: boolean }>;
+  getRequiredReviewApproval?(request: GithubPullRequestReviewRequest): Promise<GithubRequiredApprovalStatus>;
 }
 
 export interface GithubPullRequestSearchRequest {
@@ -74,6 +82,12 @@ export interface GithubRequiredChecksRequest {
   branch: string;
 }
 
+export interface GithubPullRequestReviewRequest {
+  repository: RepositoryIdentity;
+  pullRequestNumber: number;
+  headSha: string;
+}
+
 export const TRUSTED_AO_ADAPTERS = ['fixture-ao-client', 'ao-cli-client'] as const;
 export type TrustedAoAdapterName = (typeof TRUSTED_AO_ADAPTERS)[number];
 
@@ -84,7 +98,28 @@ export interface AoCapabilityReport {
     spawn: boolean;
     session: boolean;
     report: boolean;
+    review: boolean;
   };
+}
+
+export interface AoNativeReviewCapability {
+  supported: boolean;
+  statusSupported: boolean;
+  triggerSupported: boolean;
+  triggerRequiresHumanAuthorization: boolean;
+  reviewerIndependenceRequired: boolean;
+}
+
+export interface AoNativeReviewRun {
+  runId?: string;
+  pullRequestNumber: number;
+  headSha: string;
+  status: NativeReviewRunStatus;
+  verdict?: NativeReviewVerdict;
+  reviewer?: NativeReviewReviewerIdentity;
+  acceptedCriteriaEvidence?: string[];
+  diagnosticCode?: string;
+  source?: 'fixture-data' | 'ao-review-list';
 }
 
 export interface AoSpawnWorkerRequest {
@@ -116,6 +151,9 @@ export interface AoClient {
   listSessions?(query?: AoSessionQuery): Promise<SessionIdentity[]>;
   spawnWorker?(request: AoSpawnWorkerRequest): Promise<AoSpawnWorkerResult>;
   report?(message: string): Promise<void>;
+  getNativeReviewCapability?(): Promise<AoNativeReviewCapability>;
+  getNativeReviewRun?(request: GithubPullRequestReviewRequest): Promise<AoNativeReviewRun>;
+  listNativeReviewThreads?(request: GithubPullRequestReviewRequest): Promise<{ threads: NativeReviewThread[]; complete: boolean }>;
 }
 
 export interface ControllerClients {
@@ -208,6 +246,10 @@ export function createFixtureClients(config: ControllerConfig, calls: ReadOnlyCa
           complete: true,
           rules: [{ name: 'test', trusted: true }]
         };
+      },
+      async listPullRequestReviewFindings() {
+        calls.githubReads.push('reviewFindings');
+        return { findings: [], complete: true };
       }
     },
     ao: {
@@ -220,7 +262,8 @@ export function createFixtureClients(config: ControllerConfig, calls: ReadOnlyCa
           commands: {
             spawn: true,
             session: true,
-            report: true
+            report: true,
+            review: true
           }
         };
       },
@@ -239,6 +282,36 @@ export function createFixtureClients(config: ControllerConfig, calls: ReadOnlyCa
             (query?.issueNumber === undefined || session.issueNumber === query.issueNumber) &&
             (query?.branch === undefined || session.branch === query.branch)
         );
+      },
+      async getNativeReviewCapability() {
+        calls.aoReads.push('nativeReviewCapability');
+        return {
+          supported: true,
+          statusSupported: true,
+          triggerSupported: true,
+          triggerRequiresHumanAuthorization: true,
+          reviewerIndependenceRequired: true
+        };
+      },
+      async getNativeReviewRun(request) {
+        calls.aoReads.push(`nativeReviewRun:${request.pullRequestNumber}:${request.headSha}`);
+        return {
+          runId: `fixture-review-${request.pullRequestNumber}`,
+          pullRequestNumber: request.pullRequestNumber,
+          headSha: request.headSha,
+          status: 'completed',
+          verdict: 'approved',
+          reviewer: {
+            id: 'ao-native-reviewer',
+            type: 'ao-native-reviewer',
+            independent: true,
+            provenance: 'fixture'
+          }
+        };
+      },
+      async listNativeReviewThreads(request) {
+        calls.aoReads.push(`nativeReviewThreads:${request.pullRequestNumber}:${request.headSha}`);
+        return { threads: [], complete: true };
       }
     }
   };

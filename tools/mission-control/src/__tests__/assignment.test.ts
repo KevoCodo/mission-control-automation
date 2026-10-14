@@ -40,12 +40,12 @@ describe('AO session assignment adapter', () => {
       inspector()
     );
 
-    expect(result.capabilities.commands).toEqual({ spawn: true, session: true, report: true });
+    expect(result.capabilities.commands).toEqual({ spawn: true, session: true, report: true, review: true });
     expect(calls.aoReads).toContain('capabilities');
   });
 
   it('rejects fake AO capability versions missing allowlisted commands', async () => {
-    const clients = clientsWith({ capabilities: { commands: { spawn: false, session: true, report: true } } });
+    const clients = clientsWith({ capabilities: { commands: { spawn: false, session: true, report: true, review: true } } });
 
     await expect(assignIssueWithAo(statePath(), auditPath(), config(), clients, request(), inspector())).rejects.toMatchObject({
       code: 'EAO_CAPABILITY'
@@ -701,7 +701,7 @@ function config(override: Partial<ControllerConfig> = {}): ControllerConfig {
 
 function clientsWith(options: {
   adapterName?: string;
-  capabilities?: Partial<{ commands: { spawn: boolean; session: boolean; report: boolean } }>;
+  capabilities?: Partial<{ commands: { spawn: boolean; session: boolean; report: boolean; review: boolean } }>;
   sessions?: SessionIdentity[];
   spawnWorker?: ControllerClients['ao']['spawnWorker'];
 } = {}): ControllerClients {
@@ -718,6 +718,7 @@ function clientsWith(options: {
             spawn: true,
             session: true,
             report: true,
+            review: true,
             ...options.capabilities?.commands
           }
         };

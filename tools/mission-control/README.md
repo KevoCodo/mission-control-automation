@@ -13,6 +13,7 @@ npm run test:controller
 node tools/mission-control/dist/cli.js --help
 node tools/mission-control/dist/cli.js discover --config tools/mission-control/examples/dry-run.config.json
 node tools/mission-control/dist/cli.js track-pr --config tools/mission-control/examples/dry-run.config.json
+node tools/mission-control/dist/cli.js review-evidence --config tools/mission-control/examples/dry-run.config.json
 ```
 
 The CLI accepts `--config <path>` for a JSON file. Without a config file it uses
@@ -80,6 +81,39 @@ flags, and bounded diagnostic codes. Raw provider exceptions are not persisted
 to state, audit, or CLI output. A new head is stored as a distinct generation so
 restart reconciliation cannot reuse an older successful decision, and a delayed
 observation cannot overwrite a newer same-head observation.
+
+## Native Review Evidence
+
+`review-evidence` performs read-only AO native review status and GitHub review
+finding collection for the exact current PR head. It records AO native review
+capability, run status, reviewer independence, immutable head SHA, findings,
+unresolved threads, duplicate threads, stale-head detection, correction-cycle
+budget, and GitHub-required approval status as separate evidence.
+
+The controller does not trigger live reviews, submit GitHub reviews, resolve
+threads, or deliver controller-originated corrections in this phase. Future live
+review triggers and each correction cycle require a future trusted human
+authorization gate. Caller-provided boolean flags are recorded as unverified
+input and cannot create a correction request or consume the budget. Missing
+controller-local STOP state defaults to active; caller flags cannot clear it.
+Historical cycles remain visible across restarts and heads, with a maximum of
+two before an informational escalation plan. All correction plans are
+nonexecutable. This is not AO-wide STOP enforcement or a privileged execution
+gate. Fixed threads remain unresolved until a verified push can be observed by
+a future authorized workflow.
+AO/internal review status is never treated as GitHub-required independent
+approval.
+
+The concrete AO CLI adapter uses only `ao review ls --json` for review-run
+lookup. It parses the documented review list shape, verifies PR number and exact
+target SHA, preserves the native verdict, and fails closed when output is
+unsupported, missing, duplicated, or mismatched. A completed run without an
+approved or changes-requested verdict cannot approve. Findings and threads
+require explicit complete read results; missing, failed, or incomplete reads
+block approval even when their item arrays are empty. The adapter does not call `ao review trigger`, `ao review submit`,
+`ao send`, or thread-resolution commands. Reviewer independence is not inferred
+from harness names or session ids; absent explicit runtime provenance, the
+review evidence remains unavailable for approval purposes.
 
 ## State And Audit
 

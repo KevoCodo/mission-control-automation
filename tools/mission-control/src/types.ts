@@ -184,6 +184,110 @@ export interface PullRequestTrackingObservation {
   diagnosticCode?: string;
 }
 
+export type NativeReviewRunStatus = 'not-started' | 'running' | 'completed' | 'failed' | 'unavailable';
+export type NativeReviewVerdict = 'approved' | 'changes-requested' | 'unknown';
+export type NativeReviewDecision = 'unknown' | 'approved' | 'changes-requested' | 'stale' | 'unavailable';
+export type GithubRequiredApprovalStatus = 'approved' | 'missing' | 'changes-requested' | 'unknown' | 'unavailable';
+export type ReviewFindingSeverity = 'critical' | 'major' | 'minor';
+export type ReviewFindingStatus = 'open' | 'resolved';
+
+export interface NativeReviewReviewerIdentity {
+  id: string;
+  displayName?: string;
+  type: 'ao-native-reviewer' | 'worker' | 'human' | 'unknown';
+  independent: boolean;
+  provenance?: 'explicit-runtime' | 'fixture' | 'unsupported';
+}
+
+export interface NativeReviewFinding {
+  id: string;
+  threadId: string;
+  headSha: string;
+  severity: ReviewFindingSeverity;
+  status: ReviewFindingStatus;
+  summary: string;
+  duplicateOf?: string;
+}
+
+export interface NativeReviewThread {
+  id: string;
+  headSha: string;
+  status: ReviewFindingStatus;
+  findingIds: string[];
+  resolvedAfterPushSha?: string;
+}
+
+export interface NativeReviewCorrectionRequest {
+  issueNumber: number;
+  sessionId: string;
+  pullRequestNumber: number;
+  headSha: string;
+  cycle: number;
+  action: 'request-corrections' | 'escalate';
+  findings: NativeReviewFinding[];
+  threadIds: string[];
+  requiresHumanAuthorization: boolean;
+  verifiedPublicationRequired: boolean;
+  reason: string;
+}
+
+export interface NativeReviewAuthorizationState {
+  humanAuthorized: boolean;
+  source: 'verified-human' | 'caller-flag' | 'missing';
+}
+
+export interface NativeReviewStopState {
+  active: boolean;
+  reason?: string;
+}
+
+export interface NativeReviewControlState {
+  stopActive: boolean;
+  reason: string;
+}
+
+export interface NativeReviewCorrectionPlan {
+  action: 'consider-corrections' | 'escalate';
+  cycle: number;
+  executable: false;
+  blockedReasons: string[];
+  findingIds: string[];
+  threadIds: string[];
+}
+
+export interface NativeReviewObservation {
+  pullRequestNumber: number;
+  issueNumber: number;
+  sessionId: string;
+  branch: string;
+  headSha: string;
+  runId?: string;
+  runStatus: NativeReviewRunStatus;
+  runVerdict: NativeReviewVerdict;
+  nativeReviewDecision: NativeReviewDecision;
+  githubRequiredApproval: GithubRequiredApprovalStatus;
+  capabilityVerified: boolean;
+  triggerAuthorized: boolean;
+  triggerAuthorization: NativeReviewAuthorizationState;
+  correctionAuthorization: NativeReviewAuthorizationState;
+  stopState: NativeReviewStopState;
+  reviewer?: NativeReviewReviewerIdentity;
+  independentReviewer: boolean;
+  findings: NativeReviewFinding[];
+  findingsComplete: boolean;
+  threadsComplete: boolean;
+  unresolvedThreadIds: string[];
+  duplicateThreadIds: string[];
+  stale: boolean;
+  unavailable: boolean;
+  correctionCycle: number;
+  correctionEscalated: boolean;
+  correctionRequest?: NativeReviewCorrectionRequest;
+  correctionPlan?: NativeReviewCorrectionPlan;
+  observedAt: string;
+  diagnosticCode?: string;
+}
+
 export interface DiscoveryResult {
   mode: ExecutionMode;
   repository: string;
@@ -203,6 +307,8 @@ export interface ControllerState {
   operations: OperationRecord[];
   discoveries: DiscoveryResult[];
   pullRequestTracking: PullRequestTrackingObservation[];
+  nativeReviewTracking: NativeReviewObservation[];
+  nativeReviewControl: NativeReviewControlState;
   updatedAt: string;
 }
 

@@ -551,6 +551,8 @@ async function readStateOrInitial(statePath: string, config: ControllerConfig) {
         operations: [],
         discoveries: [],
         pullRequestTracking: [],
+        nativeReviewTracking: [],
+        nativeReviewControl: { stopActive: true, reason: 'Trusted correction authorization is unavailable.' },
         updatedAt: new Date().toISOString()
       };
     }

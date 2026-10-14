@@ -8,6 +8,7 @@ import {
   type ControllerState,
   type DiscoveryResult,
   type IdentityMap,
+  type NativeReviewObservation,
   type OperationRecord,
   type PullRequestTrackingObservation
 } from './types.js';
@@ -37,6 +38,8 @@ export function createInitialState(config: ControllerConfig, now = new Date()): 
     operations: [],
     discoveries: [],
     pullRequestTracking: [],
+    nativeReviewTracking: [],
+    nativeReviewControl: { stopActive: true, reason: 'Trusted correction authorization is unavailable.' },
     updatedAt: now.toISOString()
   };
 }
@@ -178,6 +181,58 @@ export async function appendPullRequestTrackingObservation(
   });
 }
 
+export async function appendNativeReviewObservation(
+  filePath: string,
+  config: ControllerConfig,
+  observation: NativeReviewObservation,
+  now = new Date()
+): Promise<NativeReviewObservation> {
+  return withStateLock(filePath, 'append-native-review', DEFAULT_STATE_LOCK_STALE_AFTER_MS, async () => {
+    let state: ControllerState;
+    try {
+      state = await readState(filePath);
+    } catch (error) {
+      if (error instanceof StateError && error.code === 'ENOENT') {
+        state = createInitialState(config, now);
+      } else {
+        throw error;
+      }
+    }
+
+    const priorForPullRequest = state.nativeReviewTracking.filter(
+      (entry) => entry.pullRequestNumber === observation.pullRequestNumber
+    );
+    const latest = priorForPullRequest.at(-1);
+    if (latest && latest.headSha !== observation.headSha) {
+      const latestTime = Date.parse(latest.observedAt);
+      const nextTime = Date.parse(observation.observedAt);
+      if (Number.isFinite(latestTime) && Number.isFinite(nextTime) && latestTime > nextTime) {
+        throw new StateError('Refusing to persist a superseded native review observation.', 'ESTALE_HEAD');
+      }
+    }
+
+    const sameHead = priorForPullRequest.find((entry) => entry.headSha === observation.headSha);
+    if (sameHead) {
+      const sameHeadTime = Date.parse(sameHead.observedAt);
+      const nextTime = Date.parse(observation.observedAt);
+      if (Number.isFinite(sameHeadTime) && Number.isFinite(nextTime) && sameHeadTime >= nextTime) {
+        return sameHead;
+      }
+    }
+
+    const withoutSameHead = state.nativeReviewTracking.filter(
+      (entry) => !(entry.pullRequestNumber === observation.pullRequestNumber && entry.headSha === observation.headSha)
+    );
+    const nextState: ControllerState = {
+      ...state,
+      nativeReviewTracking: [...withoutSameHead, observation],
+      updatedAt: now.toISOString()
+    };
+    await writeStateAtomicUnlocked(filePath, nextState);
+    return observation;
+  });
+}
+
 export function parseState(value: unknown): ControllerState {
   if (!isRecord(value)) {
     throw new StateError('State must be a JSON object.');
@@ -244,6 +299,17 @@ export function parseState(value: unknown): ControllerState {
     pullRequestTracking: Array.isArray(value.pullRequestTracking)
       ? (value.pullRequestTracking as PullRequestTrackingObservation[])
       : [],
+    nativeReviewTracking: Array.isArray(value.nativeReviewTracking)
+      ? (value.nativeReviewTracking as NativeReviewObservation[])
+      : [],
+    nativeReviewControl: isRecord(value.nativeReviewControl) && typeof value.nativeReviewControl.stopActive === 'boolean'
+      ? {
+          stopActive: value.nativeReviewControl.stopActive,
+          reason: typeof value.nativeReviewControl.reason === 'string'
+            ? value.nativeReviewControl.reason
+            : 'Trusted correction authorization is unavailable.'
+        }
+      : { stopActive: true, reason: 'Trusted correction authorization is unavailable.' },
     updatedAt: value.updatedAt
   };
 }
@@ -314,6 +380,8 @@ function migrateVersionOneState(value: Record<string, unknown>): ControllerState
     operations: [],
     discoveries: value.discoveries as ControllerState['discoveries'],
     pullRequestTracking: [],
+    nativeReviewTracking: [],
+    nativeReviewControl: { stopActive: true, reason: 'Trusted correction authorization is unavailable.' },
     updatedAt: value.updatedAt
   };
 }
