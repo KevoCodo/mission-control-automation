@@ -7,5 +7,6 @@ export * from './discovery.js';
 export * from './recovery.js';
 export * from './graph.js';
 export * from './planner.js';
+export * from './prTracking.js';
 export * from './state.js';
 export * from './types.js';

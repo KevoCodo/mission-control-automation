@@ -6,7 +6,10 @@ import type {
   IssueDependencyReference,
   IssueIdentity,
   PullRequestIdentity,
+  PullRequestCheckRun,
+  PullRequestDetails,
   RepositoryIdentity,
+  RequiredCheckDiscovery,
   SessionIdentity
 } from './types.js';
 
@@ -31,6 +34,44 @@ export interface GithubClient {
   getIssue(identity: IssueIdentity): Promise<DiscoveryIssue>;
   getPullRequest(identity: PullRequestIdentity): Promise<DiscoveryPullRequest>;
   listEpicChildren?(request: GithubIssueDiscoveryRequest): AsyncIterable<GithubIssueDiscoveryPage>;
+  findPullRequestsForBranch?(request: GithubPullRequestSearchRequest): AsyncIterable<GithubPullRequestSearchPage>;
+  getPullRequestDetails?(identity: PullRequestIdentity): Promise<PullRequestDetails>;
+  listPullRequestChecks?(request: GithubPullRequestChecksRequest): AsyncIterable<GithubPullRequestChecksPage>;
+  getRequiredChecks?(request: GithubRequiredChecksRequest): Promise<RequiredCheckDiscovery>;
+}
+
+export interface GithubPullRequestSearchRequest {
+  repository: RepositoryIdentity;
+  branch: string;
+}
+
+export interface GithubPullRequestSearchPage {
+  pageInfo: {
+    page: number;
+    hasNextPage: boolean;
+  };
+  pullRequests: PullRequestDetails[];
+}
+
+export interface GithubPullRequestChecksRequest {
+  repository: RepositoryIdentity;
+  pullRequestNumber: number;
+  headSha: string;
+  pageSize: number;
+}
+
+export interface GithubPullRequestChecksPage {
+  pageInfo: {
+    page: number;
+    hasNextPage: boolean;
+    rateLimited?: boolean;
+  };
+  checks: PullRequestCheckRun[];
+}
+
+export interface GithubRequiredChecksRequest {
+  repository: RepositoryIdentity;
+  branch: string;
 }
 
 export const TRUSTED_AO_ADAPTERS = ['fixture-ao-client', 'ao-cli-client'] as const;
@@ -133,6 +174,40 @@ export function createFixtureClients(config: ControllerConfig, calls: ReadOnlyCa
           branch: identity.branch,
           state: identity.number === 0 ? 'pending' : 'open'
         };
+      },
+      async *findPullRequestsForBranch(request) {
+        calls.githubReads.push(`pullRequestsForBranch:${request.branch}`);
+        yield {
+          pageInfo: { page: 1, hasNextPage: false },
+          pullRequests: config.identities.pullRequests
+            .filter((identity) => identity.branch === request.branch)
+            .map((identity) => toFixturePullRequestDetails(config, identity))
+        };
+      },
+      async getPullRequestDetails(identity) {
+        calls.githubReads.push(`pullRequestDetails:${identity.number}`);
+        return toFixturePullRequestDetails(config, identity);
+      },
+      async *listPullRequestChecks(request) {
+        calls.githubReads.push(`pullRequestChecks:${request.pullRequestNumber}:${request.headSha}`);
+        yield {
+          pageInfo: { page: 1, hasNextPage: false },
+          checks: [
+            {
+              name: 'test',
+              status: 'completed',
+              conclusion: 'success',
+              headSha: request.headSha
+            }
+          ]
+        };
+      },
+      async getRequiredChecks(request) {
+        calls.githubReads.push(`requiredChecks:${request.branch}`);
+        return {
+          complete: true,
+          rules: [{ name: 'test', trusted: true }]
+        };
       }
     },
     ao: {
@@ -165,6 +240,29 @@ export function createFixtureClients(config: ControllerConfig, calls: ReadOnlyCa
             (query?.branch === undefined || session.branch === query.branch)
         );
       }
+    }
+  };
+}
+
+function toFixturePullRequestDetails(config: ControllerConfig, identity: PullRequestIdentity): PullRequestDetails {
+  const session = config.identities.sessions.find((candidate) => candidate.branch === identity.branch);
+  return {
+    id: identity.id,
+    number: identity.number,
+    branch: identity.branch,
+    state: identity.number === 0 ? 'pending' : 'open',
+    baseBranch: config.repository.defaultBranch,
+    draft: false,
+    closed: false,
+    head: {
+      sha: `fixture-head-${identity.number}`,
+      branch: identity.branch,
+      repository: identity.repository ?? config.repository,
+      fork: false
+    },
+    association: {
+      issueNumber: identity.issueNumber ?? session?.issueNumber,
+      sessionId: session?.id
     }
   };
 }

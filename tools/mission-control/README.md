@@ -12,6 +12,7 @@ npm run build:controller
 npm run test:controller
 node tools/mission-control/dist/cli.js --help
 node tools/mission-control/dist/cli.js discover --config tools/mission-control/examples/dry-run.config.json
+node tools/mission-control/dist/cli.js track-pr --config tools/mission-control/examples/dry-run.config.json
 ```
 
 The CLI accepts `--config <path>` for a JSON file. Without a config file it uses
@@ -53,6 +54,32 @@ sets are rejected.
 Graph nodes distinguish open issues, closed issues with verified completion, and
 closed-but-unverified issues. A node is eligible only when every dependency is
 verified complete.
+
+## Pull Request And CI Tracking
+
+`track-pr` performs read-only PR/session/branch association and exact-head CI
+observation for an already assigned worker. The intended issue/session/branch
+must be backed by exactly one succeeded durable AO assignment record in schema v2
+state; matching a branch alone is not enough. It rejects duplicate PR matches,
+incomplete or malformed PR search pagination, unrelated branches or
+repositories, forks, draft PRs, closed PRs, mismatched issue/session
+associations, and stale expected head SHAs.
+
+Required check discovery is trusted adapter data; missing, untrusted,
+incomplete, rate-limited, paginated-out, or unavailable required checks fail
+closed rather than inheriting success from an earlier head. Skipped required
+checks are accepted only when an explicit trusted required-check rule lists that
+conclusion as allowed. A successful CI observation never records review
+approval; the review decision remains `unknown` unless a separate exact-head
+review signal is added in a later authorized phase.
+
+PR observations are persisted in schema v2 state under `pullRequestTracking`
+with the PR number, issue number, session id, branch, head SHA, check
+reconciliation, generation, fixture-vs-GitHub data source, stale/unavailable
+flags, and bounded diagnostic codes. Raw provider exceptions are not persisted
+to state, audit, or CLI output. A new head is stored as a distinct generation so
+restart reconciliation cannot reuse an older successful decision, and a delayed
+observation cannot overwrite a newer same-head observation.
 
 ## State And Audit
 

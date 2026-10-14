@@ -550,6 +550,7 @@ async function readStateOrInitial(statePath: string, config: ControllerConfig) {
         identities: config.identities,
         operations: [],
         discoveries: [],
+        pullRequestTracking: [],
         updatedAt: new Date().toISOString()
       };
     }

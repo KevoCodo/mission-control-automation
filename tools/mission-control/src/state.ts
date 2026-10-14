@@ -8,7 +8,8 @@ import {
   type ControllerState,
   type DiscoveryResult,
   type IdentityMap,
-  type OperationRecord
+  type OperationRecord,
+  type PullRequestTrackingObservation
 } from './types.js';
 import { withStateLock } from './locks.js';
 
@@ -35,6 +36,7 @@ export function createInitialState(config: ControllerConfig, now = new Date()): 
     identities: config.identities,
     operations: [],
     discoveries: [],
+    pullRequestTracking: [],
     updatedAt: now.toISOString()
   };
 }
@@ -117,6 +119,65 @@ export async function appendDiscovery(
   });
 }
 
+export async function appendPullRequestTrackingObservation(
+  filePath: string,
+  config: ControllerConfig,
+  observation: PullRequestTrackingObservation,
+  now = new Date()
+): Promise<PullRequestTrackingObservation> {
+  return withStateLock(filePath, 'append-pr-tracking', DEFAULT_STATE_LOCK_STALE_AFTER_MS, async () => {
+    let state: ControllerState;
+    try {
+      state = await readState(filePath);
+    } catch (error) {
+      if (error instanceof StateError && error.code === 'ENOENT') {
+        state = createInitialState(config, now);
+      } else {
+        throw error;
+      }
+    }
+
+    const priorForPullRequest = state.pullRequestTracking.filter(
+      (entry) => entry.pullRequestNumber === observation.pullRequestNumber
+    );
+    const latest = priorForPullRequest.at(-1);
+    if (latest && latest.headSha !== observation.headSha) {
+      const latestTime = Date.parse(latest.observedAt);
+      const nextTime = Date.parse(observation.observedAt);
+      if (Number.isFinite(latestTime) && Number.isFinite(nextTime) && latestTime > nextTime) {
+        throw new StateError('Refusing to persist a superseded pull request head observation.', 'ESTALE_HEAD');
+      }
+    }
+
+    const sameHead = priorForPullRequest.find((entry) => entry.headSha === observation.headSha);
+    if (sameHead) {
+      const sameHeadTime = Date.parse(sameHead.observedAt);
+      const nextTime = Date.parse(observation.observedAt);
+      if (Number.isFinite(sameHeadTime) && Number.isFinite(nextTime) && sameHeadTime >= nextTime) {
+        return sameHead;
+      }
+    }
+
+    const generation =
+      sameHead?.generation ??
+      (priorForPullRequest.length === 0 ? 1 : Math.max(...priorForPullRequest.map((entry) => entry.generation ?? 1)) + 1);
+    const persisted: PullRequestTrackingObservation = {
+      ...observation,
+      generation
+    };
+    const withoutSameHead = state.pullRequestTracking.filter(
+      (entry) => !(entry.pullRequestNumber === observation.pullRequestNumber && entry.headSha === observation.headSha)
+    );
+    const nextState: ControllerState = {
+      ...state,
+      pullRequestTracking: [...withoutSameHead, persisted],
+      updatedAt: now.toISOString()
+    };
+    await writeStateAtomicUnlocked(filePath, nextState);
+    return persisted;
+  });
+}
+
 export function parseState(value: unknown): ControllerState {
   if (!isRecord(value)) {
     throw new StateError('State must be a JSON object.');
@@ -180,6 +241,9 @@ export function parseState(value: unknown): ControllerState {
     },
     operations: value.operations as OperationRecord[],
     discoveries: value.discoveries as ControllerState['discoveries'],
+    pullRequestTracking: Array.isArray(value.pullRequestTracking)
+      ? (value.pullRequestTracking as PullRequestTrackingObservation[])
+      : [],
     updatedAt: value.updatedAt
   };
 }
@@ -249,6 +313,7 @@ function migrateVersionOneState(value: Record<string, unknown>): ControllerState
     },
     operations: [],
     discoveries: value.discoveries as ControllerState['discoveries'],
+    pullRequestTracking: [],
     updatedAt: value.updatedAt
   };
 }

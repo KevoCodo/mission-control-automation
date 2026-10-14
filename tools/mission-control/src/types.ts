@@ -31,6 +31,8 @@ export interface PullRequestIdentity {
   id: string | number;
   number: number;
   branch: string;
+  issueNumber?: number;
+  repository?: RepositoryIdentity;
 }
 
 export interface IdentityMap {
@@ -110,6 +112,78 @@ export interface DiscoveryPullRequest {
   state: string;
 }
 
+export type PullRequestReviewDecision = 'unknown' | 'pending' | 'changes-requested' | 'stale' | 'unavailable';
+
+export type CheckConclusion = 'success' | 'failure' | 'cancelled' | 'skipped' | 'neutral' | 'timed-out' | 'action-required';
+export type CheckStatus = 'queued' | 'in_progress' | 'completed' | 'pending' | 'unavailable';
+export type CheckObservationStatus = 'pending' | 'failed' | 'successful' | 'stale' | 'skipped' | 'missing' | 'unavailable';
+export type PullRequestTrackingStatus = 'pending' | 'failed' | 'successful' | 'stale' | 'unavailable';
+
+export interface PullRequestHeadIdentity {
+  sha: string;
+  branch: string;
+  repository: RepositoryIdentity;
+  fork: boolean;
+}
+
+export interface PullRequestAssociation {
+  issueNumber?: number;
+  sessionId?: string;
+}
+
+export interface PullRequestDetails extends DiscoveryPullRequest {
+  baseBranch: string;
+  head: PullRequestHeadIdentity;
+  draft: boolean;
+  closed: boolean;
+  association?: PullRequestAssociation;
+}
+
+export interface PullRequestCheckRun {
+  name: string;
+  status: CheckStatus;
+  conclusion?: CheckConclusion;
+  headSha: string;
+}
+
+export interface RequiredCheckRule {
+  name: string;
+  trusted: boolean;
+  allowedConclusions?: CheckConclusion[];
+}
+
+export interface RequiredCheckDiscovery {
+  rules: RequiredCheckRule[];
+  complete: boolean;
+}
+
+export interface PullRequestCheckObservation {
+  name: string;
+  status: CheckObservationStatus;
+  required: boolean;
+  headSha: string;
+  conclusion?: CheckConclusion;
+  allowedByPolicy?: boolean;
+}
+
+export interface PullRequestTrackingObservation {
+  pullRequestNumber: number;
+  issueNumber: number;
+  sessionId: string;
+  branch: string;
+  headSha: string;
+  status: PullRequestTrackingStatus;
+  reviewDecision: PullRequestReviewDecision;
+  checks: PullRequestCheckObservation[];
+  requiredChecksComplete: boolean;
+  stale: boolean;
+  unavailable: boolean;
+  generation: number;
+  dataSource: 'fixture-data' | 'github';
+  observedAt: string;
+  diagnosticCode?: string;
+}
+
 export interface DiscoveryResult {
   mode: ExecutionMode;
   repository: string;
@@ -128,6 +202,7 @@ export interface ControllerState {
   identities: IdentityMap;
   operations: OperationRecord[];
   discoveries: DiscoveryResult[];
+  pullRequestTracking: PullRequestTrackingObservation[];
   updatedAt: string;
 }
 

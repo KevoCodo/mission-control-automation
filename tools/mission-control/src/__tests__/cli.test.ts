@@ -4,7 +4,9 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { runCli } from '../cli.js';
+import { defaultConfig } from '../config.js';
 import { acquireControllerLock, getDefaultControllerLockPath, releaseControllerLock } from '../locks.js';
+import { createInitialState, writeStateAtomic } from '../state.js';
 
 let tempDirectory: string;
 const fixturePath = path.resolve('tools/mission-control/src/__tests__/fixtures/win32-lock-owner.mjs');
@@ -38,6 +40,32 @@ describe('mission-control cli', () => {
     await expect(readFile(statePath, 'utf8')).resolves.toContain('"discoveries"');
     await expect(readFile(statePath, 'utf8')).resolves.toContain('"dependencyGraph"');
     await expect(readFile(auditPath, 'utf8')).resolves.toContain('discovery.completed');
+  });
+
+  it('runs read-only PR and CI tracking summary', async () => {
+    const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    const statePath = path.join(tempDirectory, 'state.json');
+    const auditPath = path.join(tempDirectory, 'audit.jsonl');
+    await writeStateAtomic(statePath, defaultStateWithAssignment());
+
+    await expect(runCli(['track-pr', '--state', statePath, '--audit', auditPath])).resolves.toBe(0);
+
+    expect(stdout).toHaveBeenCalledWith(expect.stringContaining('"status": "successful"'));
+    expect(stdout).toHaveBeenCalledWith(expect.stringContaining('"dataSource": "fixture-data"'));
+    await expect(readFile(statePath, 'utf8')).resolves.toContain('"pullRequestTracking"');
+    await expect(readFile(auditPath, 'utf8')).resolves.toContain('prTracking.completed');
+  });
+
+  it('fails closed on stale track-pr expected head before persisting audit', async () => {
+    const stderr = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    const statePath = path.join(tempDirectory, 'state.json');
+    const auditPath = path.join(tempDirectory, 'audit.jsonl');
+    await writeStateAtomic(statePath, defaultStateWithAssignment());
+
+    await expect(runCli(['track-pr', '--state', statePath, '--audit', auditPath, '--head', 'stale-head'])).resolves.toBe(1);
+
+    expect(stderr).toHaveBeenCalledWith(expect.stringContaining('head SHA is stale'));
+    await expect(readFile(auditPath, 'utf8')).rejects.toMatchObject({ code: 'ENOENT' });
   });
 
   it('fails closed before discovery or audit mutation when controller ownership is unavailable', async () => {
@@ -88,6 +116,35 @@ describe('mission-control cli', () => {
     expect(stderr).toHaveBeenCalledWith(expect.stringContaining('--config requires a value'));
   });
 });
+
+function defaultStateWithAssignment() {
+  return {
+    ...createInitialState(defaultConfig),
+    operations: [
+      {
+        intent: {
+          key: 'ao-spawn-worker:issue:4:fixture-session:ao/issue-4-controller-skeleton',
+          action: 'ao-spawn-worker',
+          targetType: 'issue',
+          targetId: 4,
+          payload: {
+            sessionId: 'fixture-session',
+            branch: 'ao/issue-4-controller-skeleton',
+            worktreePath: 'E:\\AI-Development\\ao-data\\data\\worktrees\\ai-delivery-lab\\fixture-session'
+          }
+        },
+        status: 'succeeded' as const,
+        attempts: 1,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        outcome: {
+          provider: 'ao',
+          externalId: 'fixture-session'
+        }
+      }
+    ]
+  };
+}
 
 async function readChildJson(child: ChildProcessWithoutNullStreams): Promise<Record<string, unknown>> {
   return new Promise((resolve, reject) => {
