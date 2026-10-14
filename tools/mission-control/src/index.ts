@@ -6,6 +6,8 @@ export * from './config.js';
 export * from './discovery.js';
 export * from './recovery.js';
 export * from './graph.js';
+export * from './mergeEngine.js';
+export * from './mergePolicy.js';
 export * from './planner.js';
 export * from './prTracking.js';
 export * from './state.js';

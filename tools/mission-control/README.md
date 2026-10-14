@@ -153,3 +153,41 @@ process rather than edit lock sidecars.
 Controller worktrees are constrained to `E:` roots. The skeleton does not build
 shell commands from issue text and does not spawn workers, schedule loops, create
 issues, merge pull requests, or deploy software.
+
+## Merge policy boundary
+
+`evaluateMergePolicy` is a pure, versioned, fail-closed assessment. It returns policy eligibility,
+action permission, and result separately. It checks durable assignment ownership,
+repository and PR identity, exact head generation, trusted required CI, an independent
+native approval with explicit runtime reviewer provenance, GitHub approval, complete
+findings and threads, acceptance evidence, low risk, changed paths and content,
+branch protection, and controller STOP state. Issue #10 is always excluded from
+unattended eligibility. Unknown files and sensitive security, authentication,
+secrets, CI, infrastructure, deployment, migration, gate, merge policy, and STOP
+changes are blocked. A caller's `risk: low` claim is insufficient: the only
+positive risk evidence currently supported is an explicit independent, complete
+**test mock** file inventory with old and new paths and content. Renames,
+deletions, unknown file types, incomplete inventories, and missing content fail
+closed. The test mock is simulated evidence, not production provenance or authority.
+
+The controller has no trusted grant issuer or verifier. A live grant would need an
+external verifiable issuer and a signature bound to repository, PR, exact SHA,
+action, expiry, and nonce. The trusted runtime must check revocation, consume the
+nonce once, audit the decision, and revalidate STOP, provider state, protection,
+policy, and exact head when queued and immediately before the side effect. Caller
+flags, fixtures, and configuration are never authority. Until that component
+exists, action permission is always false and `DisabledGithubMergeAdapter` throws.
+Its narrow contract uses GitHub's merge API with an expected head SHA and only
+the permission needed to merge; it provides no shell merge or protection bypass.
+This is a controller-local boundary, not AO-wide enforcement.
+
+`mergeIntentKey` provides a stable future operation key. `stageMergeIntent` only
+stores one idempotent, nonexecutable informational audit event and never creates
+a pending `merge-pr` operation. `reconcileMergeIntent` applies only to a separate
+historically authorized operation; it requires authoritative provider truth before
+handling an uncertain response and never blindly repeats a merge. A future trusted
+runtime would need a verified grant and fresh STOP, head, policy, and provider checks
+before creating or executing an operation. Issue closure has its own eligibility assessment and
+requires separately authorized action after verified merge and completion evidence;
+no close adapter is provided. Dependency scheduling continues to rely on verified
+completion, not a merge attempt or a merely closed issue.
