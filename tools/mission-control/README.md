@@ -1,9 +1,13 @@
 # Mission Control
 
+Documentation checkpoint: version 1, 2026-10-14, base `02d1571`. See the [living SOP](../../docs/MISSION_CONTROL_LIVING_SOP.md) and [root README](../../README.md).
+
 Mission Control is a read-only controller skeleton for coordinating explicit
 GitHub issue, AO session, and pull request identities. It defaults to dry-run
 mode, uses fixture adapters unless trusted adapters are injected by a caller,
 and must not mutate GitHub, AO, branches, issues, sessions, or deployments.
+
+The library has a narrowly scoped AO assignment adapter for trusted callers; the bundled dry-run CLI does not invoke live spawning. The merge adapter is disabled. A plan, pending intent, CI result, or review verdict does not grant permission for a side effect.
 
 ## Commands
 
@@ -153,6 +157,20 @@ process rather than edit lock sidecars.
 Controller worktrees are constrained to `E:` roots. The skeleton does not build
 shell commands from issue text and does not spawn workers, schedule loops, create
 issues, merge pull requests, or deploy software.
+
+## Dependency security assessment
+
+`evaluateDependencySecurity` is a pure assessment of a complete npm audit v2 report, the root package manifest and lockfile, and the current Node version. It has no filesystem, network, CLI, merge, or grant effect. Missing or malformed evidence, unsupported Node, lock mismatch, and any unresolved high or critical package block eligibility, including development-only findings. Caller exception or remediation flags cannot clear an audit finding. Its output contains bounded package names, severity, runtime/development classification, and advisory IDs, not raw audit titles or paths. The caller must obtain authentic current audit evidence; this function does not authenticate npm or authorize execution.
+
+Baseline assessment on 2026-10-14 with Node 20.19.5, npm 10.8.2 and the `02d1571` lockfile: `npm audit` exited 1 with three package entries (two critical, one moderate); `npm audit --omit=dev` exited 0 with zero. All were in the development-only Vitest test runner, reachable when tests run in CI or against untrusted test inputs, not in the production React bundle. The critical [tinypool worker-options advisory](https://github.com/advisories/GHSA-5gmw-xhrv-c9v3) is fixed at 2.1.1 and [run-options advisory](https://github.com/advisories/GHSA-85c8-ppgw-ccpr) at 2.1.2. The moderate [Vitest/mocker redirect-mock advisory](https://github.com/advisories/GHSA-82fw-gwwq-j7x9) is fixed at 4.1.11. Vitest 3.2.7 required tinypool `^1.1.1` and exact `@vitest/mocker` 3.2.7; no compatible patch/minor fix covered all findings.
+
+| Package | Base locked version | Relationship | Advisory exposure | Remediated lock |
+| --- | --- | --- | --- | --- |
+| `vitest` | 3.2.7 | Direct development | Aggregate critical and moderate test runner advisories | 4.1.11 |
+| `tinypool` | 1.1.1 | Transitive development | Two critical prototype-pollution/RCE advisories | Removed from graph |
+| `@vitest/mocker` | 3.2.7 | Transitive development | Moderate path traversal/file read | 4.1.11 |
+
+The scoped Issue #11 migration pinned Vitest 4.1.11 and updated only its necessary transitive graph. Vite remains 7.3.7 and Koffi remains 3.3.2. Vitest 4.1.11 declares Node `^20.0.0 || ^22.0.0 || >=24.0.0`, so the separately approved project range is `^20.19.0 || ^22.12.0 || >=24.0.0`; Node 23 is unsupported. Windows CI continues to use Node 20.19.0. After `npm ci`, full and production-only audits each exited 0 with zero findings, controller tests passed 252/252, full tests 253/253, and both builds passed locally. No advisory exception or audit suppression is in use. Residual limits: the pure policy relies on an authentic complete npm audit report supplied by its caller, and the exact PR head still requires Windows CI and independent review before any merge decision.
 
 ## Merge policy boundary
 
