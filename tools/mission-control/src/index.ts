@@ -11,5 +11,6 @@ export * from './mergeEngine.js';
 export * from './mergePolicy.js';
 export * from './planner.js';
 export * from './prTracking.js';
+export * from './report.js';
 export * from './state.js';
 export * from './types.js';

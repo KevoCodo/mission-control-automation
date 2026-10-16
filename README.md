@@ -50,7 +50,7 @@ npm run preview
 
 ## Project Structure
 
-- `tools/mission-control/src` contains dependency discovery, AO assignment, PR/CI tracking, native review evidence, schema-v2 state, redacted audit, recovery, and a pure merge eligibility policy. The CLI defaults to dry run with fixtures. Planning and operation intent do not grant authority; live merge/close and deployment are disabled.
+- `tools/mission-control/src` contains dependency discovery, AO assignment, PR/CI tracking, native review evidence, schema-v2 state, versioned audit events, deterministic audit reports, recovery, and a pure merge eligibility policy. The CLI defaults to dry run with fixtures. Planning and operation intent do not grant authority; live merge/close and deployment are disabled.
 - `docs/` contains the living operating notes and project history.
 - `src/components` contains reusable dashboard UI components.
 - `src/data` contains static sample task data for the starter interface.

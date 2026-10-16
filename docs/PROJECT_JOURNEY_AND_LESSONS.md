@@ -34,3 +34,9 @@ Each listed issue PR was merged with a linked successful [Windows CI](../.github
 - Exact-head CI and reviewer provenance without treating checks as permission.
 - Learning from the documented STOP failure and specifying broker controls.
 - Staged delivery with explicit scope, budgets, and reproducible dependencies.
+
+## Issue #12 local reporting checkpoint
+
+Issue #12 adds a read-only engineering history from versioned, redacted audit events and an optional state snapshot. The report makes missing history, stale evidence, uncertain operations, unknown actor provenance, and cross-file snapshot limits visible. It distinguishes AO native review from GitHub approval, eligibility from action, and closure from verified completion. Eight deterministic golden scenarios cover completion-shaped, blocked, recovered, duplicate/replayed, incomplete, stale, uncertain, and injection evidence. This local correction pass does not claim live authorization enforcement, complete provider authentication, a merged PR, or Issue #13 E2E delivery.
+
+The Issue #12 AO delivery is uncertain: a local reviewed commit exists, but this checkpoint has no authenticated AO delivery outcome or matching provider record. Treat any AO or human-origin label as unverified until independently reconciled. Local report hashes and a successful local test run do not establish publication or authorization. Future work needs a trusted provider snapshot, exact-head CI and review evidence, explicit human authority, and a verified action outcome before completion can be claimed.

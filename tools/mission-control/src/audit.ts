@@ -1,15 +1,37 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
+import { randomUUID } from 'node:crypto';
 import { appendFile, copyFile, mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { withStateLock } from './locks.js';
 
-const SECRET_KEY_PATTERN = /(token|password|secret|credential|privateKey|authorization|apiKey)/i;
-const SECRET_VALUE_PATTERN = /(ghp_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+|Bearer\s+[A-Za-z0-9._-]+)/g;
+const SECRET_KEY_PATTERN = /(?:token|password|passwd|secret|credential|private[_-]?key|authorization|api[_-]?key|client[_-]?secret|access[_-]?key|session[_-]?key)/i;
+const SECRET_VALUE_PATTERN = /\b(?:gh[opsur]_[A-Za-z0-9_]{4,}|github_pat_[A-Za-z0-9_]{4,}|Bearer\s+[^\s<>"']+|(?:token|password|passwd|secret|credential|api[_-]?key|authorization)\s*[:=]\s*[^\s,;"']+)/gi;
 
 export interface AuditEvent {
+  version?: 1 | 2;
+  eventId?: string;
+  correlationId?: string;
+  operationKey?: string;
+  actor?: { id: string; provenance?: string };
+  evidenceRef?: string;
+  issueNumber?: number;
+  sessionId?: string;
+  pullRequestNumber?: number;
+  headSha?: string;
+  authorization?: 'unknown' | 'caller-claimed' | 'verified' | 'denied';
+  category?: 'observation' | 'intent' | 'action' | 'recovery' | 'outcome';
+  outcome?: 'unknown' | 'pending' | 'succeeded' | 'failed' | 'uncertain';
+  retryOf?: string;
   type: string;
   timestamp: string;
   data: unknown;
+  provenance?: AuditProvenance;
+}
+
+export interface AuditProvenance {
+  source: 'controller' | 'fixture' | 'github' | 'ao' | 'caller' | 'unknown';
+  evidenceId?: string;
+  observedAt?: string;
 }
 
 export interface AuditRecoveryResult {
@@ -29,8 +51,9 @@ const auditTransactionStorage = new AsyncLocalStorage<boolean>();
 
 export async function appendAuditEvent(filePath: string, event: AuditEvent): Promise<void> {
   await withAuditFileTransaction(filePath, 'append-audit', async () => {
+    const validated = parseAuditEvent({ ...event, version: 2, eventId: event.eventId ?? randomUUID() });
     await mkdir(path.dirname(filePath), { recursive: true });
-    await appendFile(filePath, `${JSON.stringify(redactSecrets(event))}\n`, 'utf8');
+    await appendFile(filePath, `${JSON.stringify(redactSecrets(validated))}\n`, 'utf8');
   });
 }
 
@@ -153,7 +176,9 @@ function redact(value: unknown): unknown {
   }
   if (value && typeof value === 'object') {
     return Object.fromEntries(
-      Object.entries(value).map(([key, child]) => [key, SECRET_KEY_PATTERN.test(key) ? '[REDACTED]' : redact(child)])
+      Object.entries(value).map(([key, child]) => [key,
+        key === 'authorization' && ['unknown', 'caller-claimed', 'verified', 'denied', 'claimed-verified; unauthenticated', 'unavailable', 'missing', 'caller-flag', 'verified-human'].includes(String(child))
+          ? child : SECRET_KEY_PATTERN.test(key) ? '[REDACTED]' : redact(child)])
     );
   }
   if (typeof value === 'string') {
@@ -163,14 +188,55 @@ function redact(value: unknown): unknown {
 }
 
 function parseAuditEvent(value: unknown): AuditEvent {
-  if (!isRecord(value) || typeof value.type !== 'string' || typeof value.timestamp !== 'string' || !('data' in value)) {
+  if (!isRecord(value) || typeof value.type !== 'string' || typeof value.timestamp !== 'string' || !('data' in value) || value.data === undefined) {
     throw new Error('Invalid audit event.');
   }
+  if (value.version !== undefined && value.version !== 1 && value.version !== 2) {
+    throw new Error('Unsupported audit event version.');
+  }
+  if (!value.type.trim() || !Number.isFinite(Date.parse(value.timestamp)) || new Date(value.timestamp).toISOString() !== value.timestamp) {
+    throw new Error('Invalid audit event identity or timestamp.');
+  }
+  if (value.provenance !== undefined && (!isRecord(value.provenance) ||
+    !['controller', 'fixture', 'github', 'ao', 'caller', 'unknown'].includes(String(value.provenance.source)) ||
+    (value.provenance.evidenceId !== undefined && typeof value.provenance.evidenceId !== 'string') ||
+    (value.provenance.observedAt !== undefined && (typeof value.provenance.observedAt !== 'string' || !Number.isFinite(Date.parse(value.provenance.observedAt)))))) {
+    throw new Error('Invalid audit event provenance.');
+  }
+  const stringFields = ['eventId', 'correlationId', 'operationKey', 'evidenceRef', 'sessionId', 'headSha', 'retryOf'];
+  if (stringFields.some((field) => value[field] !== undefined && (typeof value[field] !== 'string' || !String(value[field]).trim())) ||
+    ['issueNumber', 'pullRequestNumber'].some((field) => value[field] !== undefined && (!Number.isInteger(value[field]) || Number(value[field]) <= 0)) ||
+    (value.actor !== undefined && (!isRecord(value.actor) || typeof value.actor.id !== 'string' || !value.actor.id.trim() ||
+      (value.actor.provenance !== undefined && typeof value.actor.provenance !== 'string'))) ||
+    (value.authorization !== undefined && !['unknown', 'caller-claimed', 'verified', 'denied'].includes(String(value.authorization))) ||
+    (value.category !== undefined && !['observation', 'intent', 'action', 'recovery', 'outcome'].includes(String(value.category))) ||
+    (value.outcome !== undefined && !['unknown', 'pending', 'succeeded', 'failed', 'uncertain'].includes(String(value.outcome))) ||
+    (value.version === 2 && value.eventId === undefined)) {
+    throw new Error('Invalid audit event envelope.');
+  }
   return {
+    ...(value.version === 1 || value.version === 2 ? { version: value.version } : {}),
     type: value.type,
     timestamp: value.timestamp,
-    data: value.data
+    data: value.data,
+    ...Object.fromEntries([...stringFields, 'issueNumber', 'pullRequestNumber', 'actor', 'authorization', 'category', 'outcome']
+      .filter((field) => value[field] !== undefined).map((field) => [field, value[field]])),
+    ...(value.provenance === undefined ? {} : { provenance: value.provenance as unknown as AuditProvenance })
   };
+}
+
+export function parseAuditLog(raw: string): AuditEvent[] {
+  if (raw !== '' && !raw.endsWith('\n')) {
+    throw new Error('Audit log has an incomplete final line.');
+  }
+  return raw.split('\n').slice(0, -1).map((line, index) => {
+    if (!line.trim()) throw new Error(`Audit log has an empty line at ${index + 1}.`);
+    try {
+      return parseAuditEvent(JSON.parse(line) as unknown);
+    } catch {
+      throw new Error(`Audit log has an invalid event at line ${index + 1}.`);
+    }
+  });
 }
 
 function formatTimestamp(now: Date): string {

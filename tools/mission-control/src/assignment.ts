@@ -121,6 +121,11 @@ export async function assignIssueWithAo(
     await appendAuditEvent(auditPath, {
       type: 'assignment.previewed',
       timestamp: now.toISOString(),
+      issueNumber: request.issue.number,
+      sessionId: assignment.id,
+      category: 'intent',
+      authorization: 'unknown',
+      outcome: 'pending',
       data: {
         issueNumber: request.issue.number,
         branch: request.branch,
@@ -208,6 +213,12 @@ export async function assignIssueWithAo(
   await appendAuditEvent(auditPath, {
     type: outcome.uncertain ? 'assignment.spawn.uncertain' : 'assignment.spawned',
     timestamp: now.toISOString(),
+    issueNumber: request.issue.number,
+    sessionId,
+    operationKey: intent.intent.key,
+    category: 'action',
+    authorization: 'caller-claimed',
+    outcome: outcome.uncertain ? 'uncertain' : 'succeeded',
     data: {
       issueNumber: request.issue.number,
       sessionId,

@@ -1,0 +1,2008 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`engineering history golden reports > blocked 1`] = `
+{
+  "json": "{
+  "version": 2,
+  "input": {
+    "auditSha256": "1ef1c6ad9c75c2074606b8a99a2ffe20d617ae4bc92a9c89125f5c5afdec1fe4",
+    "stateSha256": "1926a59819eb56cc294b033207645e979493048f4b4ac682a39c3b72c4245bde"
+  },
+  "repository": "KevoCodo/ai-delivery-lab",
+  "summary": {
+    "eventCount": 1,
+    "eventTypes": {
+      "observation": 1
+    },
+    "provenance": {
+      "fixture": 1
+    }
+  },
+  "events": [
+    {
+      "sequence": 1,
+      "version": 2,
+      "eventId": "event-1",
+      "type": "observation",
+      "timestamp": "2026-01-01T00:00:00.000Z",
+      "correlationId": "unavailable",
+      "operationKey": "unavailable",
+      "actor": "unavailable",
+      "actorProvenance": "unavailable",
+      "authority": "unverified",
+      "source": "fixture",
+      "evidenceRef": "fixture-1",
+      "issueNumber": 4,
+      "sessionId": "unavailable",
+      "pullRequestNumber": null,
+      "headSha": "unavailable",
+      "authorization": "unavailable",
+      "category": "observation",
+      "outcome": "unavailable",
+      "retryOf": "unavailable",
+      "data": {
+        "issueNumber": 4
+      }
+    }
+  ],
+  "history": [
+    {
+      "issueNumber": 4,
+      "epic": "unavailable",
+      "title": "Controller Project Skeleton",
+      "session": "session-4",
+      "branch": "issue-4",
+      "worktree": "E:/work/issue-4",
+      "pullRequest": "#14",
+      "head": "abcdef123456",
+      "ci": "failed (github; 2026-01-01T00:00:00.000Z)",
+      "nativeReview": "stored controller observation: approved (2026-01-01T00:00:00.000Z)",
+      "githubApproval": "stored controller observation: approved; observed at 2026-01-01T00:00:00.000Z; head abcdef123456; current GitHub verification unavailable",
+      "permissions": {
+        "builderAssignment": "unavailable",
+        "prPublication": "unavailable",
+        "nativeAoReview": "unavailable",
+        "correctionDispatch": "unavailable",
+        "githubMerge": "unavailable",
+        "githubIssueClosure": "unavailable"
+      },
+      "securityDecision": "controller STOP active; action blocked",
+      "recovery": "unavailable",
+      "usage": "unavailable",
+      "issueClosure": "unavailable",
+      "action": "No action evidence available",
+      "verifiedOutcome": "unavailable",
+      "completion": "unverified",
+      "blockers": [
+        "missing dependency/completion evidence",
+        "CI stale, unsuccessful, unavailable, or provider evidence incomplete",
+        "controller STOP active",
+        "authenticated authorization and verified provider outcome unavailable"
+      ]
+    }
+  ],
+  "state": {
+    "version": 2,
+    "updatedAt": "2026-01-01T00:00:00.000Z",
+    "operationStatuses": {},
+    "discoveryCount": 0,
+    "stopActive": true,
+    "pullRequests": [
+      {
+        "number": 14,
+        "issueNumber": 4,
+        "headSha": "abcdef123456",
+        "generation": 1,
+        "status": "failed",
+        "source": "github",
+        "observedAt": "2026-01-01T00:00:00.000Z"
+      }
+    ],
+    "nativeReviews": [
+      {
+        "number": 14,
+        "issueNumber": 4,
+        "headSha": "abcdef123456",
+        "decision": "approved",
+        "githubApproval": "approved",
+        "independentReviewer": true,
+        "findingsComplete": true,
+        "threadsComplete": true,
+        "observedAt": "2026-01-01T00:00:00.000Z",
+        "stale": false,
+        "unavailable": false
+      }
+    ]
+  },
+  "limitations": [
+    "Local audit and state are observations, not authenticated provider truth or action permission.",
+    "Audit and state are read separately; hashes identify bytes but cannot prove a common atomic snapshot.",
+    "Plans and intents do not prove execution; recorded success does not prove provider outcome.",
+    "Merge eligibility, merge execution, issue closure, and verified completion are distinct.",
+    "Unknown actor provenance exists."
+  ]
+}
+",
+  "markdown": "# Mission Control engineering history
+
+- Schema: 2
+- Repository: KevoCodo/ai-delivery-lab
+- Events: 1
+- Audit SHA-256: 1ef1c6ad9c75c2074606b8a99a2ffe20d617ae4bc92a9c89125f5c5afdec1fe4
+- State SHA-256: 1926a59819eb56cc294b033207645e979493048f4b4ac682a39c3b72c4245bde
+
+## Workflow history
+
+### Issue #4
+
+- epic: unavailable
+- title: Controller Project Skeleton
+- session: session-4
+- branch: issue-4
+- worktree: E:/work/issue-4
+- pullRequest: #14
+- head: abcdef123456
+- ci: failed (github; 2026-01-01T00:00:00.000Z)
+- nativeReview: stored controller observation: approved (2026-01-01T00:00:00.000Z)
+- githubApproval: stored controller observation: approved; observed at 2026-01-01T00:00:00.000Z; head abcdef123456; current GitHub verification unavailable
+- Authorization evidence:
+  - Builder assignment: unavailable
+  - PR publication: unavailable
+  - Native AO review: unavailable
+  - Correction dispatch: unavailable
+  - GitHub merge: unavailable
+  - GitHub issue closure: unavailable
+- securityDecision: controller STOP active; action blocked
+- recovery: unavailable
+- usage: unavailable
+- issueClosure: unavailable
+- action: No action evidence available
+- verifiedOutcome: unavailable
+- completion: unverified
+- Blockers:
+  - missing dependency/completion evidence
+  - CI stale, unsuccessful, unavailable, or provider evidence incomplete
+  - controller STOP active
+  - authenticated authorization and verified provider outcome unavailable
+
+## Event types
+
+| Type | Count |
+| --- | ---: |
+| observation | 1 |
+
+## Evidence provenance
+
+| Source | Count |
+| --- | ---: |
+| fixture | 1 |
+
+## Events
+
+### 1. observation
+
+- eventId: event-1
+- version: 2
+- timestamp: 2026-01-01T00:00:00.000Z
+- correlationId: unavailable
+- operationKey: unavailable
+- actor: unavailable
+- actorProvenance: unavailable
+- authority: unverified
+- source: fixture
+- evidenceRef: fixture-1
+- issueNumber: 4
+- sessionId: unavailable
+- pullRequestNumber: unavailable
+- headSha: unavailable
+- authorization: unavailable
+- category: observation
+- outcome: unavailable
+- retryOf: unavailable
+
+Data:
+
+~~~json
+{
+  "issueNumber": 4
+}
+~~~
+
+## State snapshot
+
+- Version: 2
+- Updated at: 2026-01-01T00:00:00.000Z
+- Discovery records: 0
+- Controller STOP active: true
+- PR observations: 1
+- Native review observations: 1
+
+### Operation statuses
+
+| Status | Count |
+| --- | ---: |
+
+### PR observations
+
+| PR | Issue | Head | Generation | Status | Source | Observed at |
+| ---: | ---: | --- | ---: | --- | --- | --- |
+| 14 | 4 | abcdef123456 | 1 | failed | github | 2026-01-01T00:00:00.000Z |
+
+### Native review observations
+
+| PR | Issue | Head | Native decision | Stored GitHub approval observation | Stale | Unavailable | Independent reviewer | Findings complete | Threads complete | Observed at |
+| ---: | ---: | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 14 | 4 | abcdef123456 | approved | approved | false | false | true | true | true | 2026-01-01T00:00:00.000Z |
+
+## Limitations
+
+- Local audit and state are observations, not authenticated provider truth or action permission.
+- Audit and state are read separately; hashes identify bytes but cannot prove a common atomic snapshot.
+- Plans and intents do not prove execution; recorded success does not prove provider outcome.
+- Merge eligibility, merge execution, issue closure, and verified completion are distinct.
+- Unknown actor provenance exists.
+
+",
+}
+`;
+
+exports[`engineering history golden reports > completed 1`] = `
+{
+  "json": "{
+  "version": 2,
+  "input": {
+    "auditSha256": "1ef1c6ad9c75c2074606b8a99a2ffe20d617ae4bc92a9c89125f5c5afdec1fe4",
+    "stateSha256": "1a27e74f8d475706f5d69dd6505d192e254159e3729ae0b17babddc0c2688d95"
+  },
+  "repository": "KevoCodo/ai-delivery-lab",
+  "summary": {
+    "eventCount": 1,
+    "eventTypes": {
+      "observation": 1
+    },
+    "provenance": {
+      "fixture": 1
+    }
+  },
+  "events": [
+    {
+      "sequence": 1,
+      "version": 2,
+      "eventId": "event-1",
+      "type": "observation",
+      "timestamp": "2026-01-01T00:00:00.000Z",
+      "correlationId": "unavailable",
+      "operationKey": "unavailable",
+      "actor": "unavailable",
+      "actorProvenance": "unavailable",
+      "authority": "unverified",
+      "source": "fixture",
+      "evidenceRef": "fixture-1",
+      "issueNumber": 4,
+      "sessionId": "unavailable",
+      "pullRequestNumber": null,
+      "headSha": "unavailable",
+      "authorization": "unavailable",
+      "category": "observation",
+      "outcome": "unavailable",
+      "retryOf": "unavailable",
+      "data": {
+        "issueNumber": 4
+      }
+    }
+  ],
+  "history": [
+    {
+      "issueNumber": 4,
+      "epic": "unavailable",
+      "title": "Controller Project Skeleton",
+      "session": "session-4",
+      "branch": "issue-4",
+      "worktree": "E:/work/issue-4",
+      "pullRequest": "#14",
+      "head": "abcdef123456",
+      "ci": "successful (github; 2026-01-01T00:00:00.000Z)",
+      "nativeReview": "stored controller observation: approved (2026-01-01T00:00:00.000Z)",
+      "githubApproval": "stored controller observation: approved; observed at 2026-01-01T00:00:00.000Z; head abcdef123456; current GitHub verification unavailable",
+      "permissions": {
+        "builderAssignment": "unavailable",
+        "prPublication": "unavailable",
+        "nativeAoReview": "unavailable",
+        "correctionDispatch": "unavailable",
+        "githubMerge": "unavailable",
+        "githubIssueClosure": "unavailable"
+      },
+      "securityDecision": "controller STOP inactive; no grant implied",
+      "recovery": "unavailable",
+      "usage": "unavailable",
+      "issueClosure": "unavailable",
+      "action": "No action evidence available",
+      "verifiedOutcome": "unavailable",
+      "completion": "unverified",
+      "blockers": [
+        "missing dependency/completion evidence",
+        "authenticated authorization and verified provider outcome unavailable"
+      ]
+    }
+  ],
+  "state": {
+    "version": 2,
+    "updatedAt": "2026-01-01T00:00:00.000Z",
+    "operationStatuses": {},
+    "discoveryCount": 0,
+    "stopActive": false,
+    "pullRequests": [
+      {
+        "number": 14,
+        "issueNumber": 4,
+        "headSha": "abcdef123456",
+        "generation": 1,
+        "status": "successful",
+        "source": "github",
+        "observedAt": "2026-01-01T00:00:00.000Z"
+      }
+    ],
+    "nativeReviews": [
+      {
+        "number": 14,
+        "issueNumber": 4,
+        "headSha": "abcdef123456",
+        "decision": "approved",
+        "githubApproval": "approved",
+        "independentReviewer": true,
+        "findingsComplete": true,
+        "threadsComplete": true,
+        "observedAt": "2026-01-01T00:00:00.000Z",
+        "stale": false,
+        "unavailable": false
+      }
+    ]
+  },
+  "limitations": [
+    "Local audit and state are observations, not authenticated provider truth or action permission.",
+    "Audit and state are read separately; hashes identify bytes but cannot prove a common atomic snapshot.",
+    "Plans and intents do not prove execution; recorded success does not prove provider outcome.",
+    "Merge eligibility, merge execution, issue closure, and verified completion are distinct.",
+    "Unknown actor provenance exists."
+  ]
+}
+",
+  "markdown": "# Mission Control engineering history
+
+- Schema: 2
+- Repository: KevoCodo/ai-delivery-lab
+- Events: 1
+- Audit SHA-256: 1ef1c6ad9c75c2074606b8a99a2ffe20d617ae4bc92a9c89125f5c5afdec1fe4
+- State SHA-256: 1a27e74f8d475706f5d69dd6505d192e254159e3729ae0b17babddc0c2688d95
+
+## Workflow history
+
+### Issue #4
+
+- epic: unavailable
+- title: Controller Project Skeleton
+- session: session-4
+- branch: issue-4
+- worktree: E:/work/issue-4
+- pullRequest: #14
+- head: abcdef123456
+- ci: successful (github; 2026-01-01T00:00:00.000Z)
+- nativeReview: stored controller observation: approved (2026-01-01T00:00:00.000Z)
+- githubApproval: stored controller observation: approved; observed at 2026-01-01T00:00:00.000Z; head abcdef123456; current GitHub verification unavailable
+- Authorization evidence:
+  - Builder assignment: unavailable
+  - PR publication: unavailable
+  - Native AO review: unavailable
+  - Correction dispatch: unavailable
+  - GitHub merge: unavailable
+  - GitHub issue closure: unavailable
+- securityDecision: controller STOP inactive; no grant implied
+- recovery: unavailable
+- usage: unavailable
+- issueClosure: unavailable
+- action: No action evidence available
+- verifiedOutcome: unavailable
+- completion: unverified
+- Blockers:
+  - missing dependency/completion evidence
+  - authenticated authorization and verified provider outcome unavailable
+
+## Event types
+
+| Type | Count |
+| --- | ---: |
+| observation | 1 |
+
+## Evidence provenance
+
+| Source | Count |
+| --- | ---: |
+| fixture | 1 |
+
+## Events
+
+### 1. observation
+
+- eventId: event-1
+- version: 2
+- timestamp: 2026-01-01T00:00:00.000Z
+- correlationId: unavailable
+- operationKey: unavailable
+- actor: unavailable
+- actorProvenance: unavailable
+- authority: unverified
+- source: fixture
+- evidenceRef: fixture-1
+- issueNumber: 4
+- sessionId: unavailable
+- pullRequestNumber: unavailable
+- headSha: unavailable
+- authorization: unavailable
+- category: observation
+- outcome: unavailable
+- retryOf: unavailable
+
+Data:
+
+~~~json
+{
+  "issueNumber": 4
+}
+~~~
+
+## State snapshot
+
+- Version: 2
+- Updated at: 2026-01-01T00:00:00.000Z
+- Discovery records: 0
+- Controller STOP active: false
+- PR observations: 1
+- Native review observations: 1
+
+### Operation statuses
+
+| Status | Count |
+| --- | ---: |
+
+### PR observations
+
+| PR | Issue | Head | Generation | Status | Source | Observed at |
+| ---: | ---: | --- | ---: | --- | --- | --- |
+| 14 | 4 | abcdef123456 | 1 | successful | github | 2026-01-01T00:00:00.000Z |
+
+### Native review observations
+
+| PR | Issue | Head | Native decision | Stored GitHub approval observation | Stale | Unavailable | Independent reviewer | Findings complete | Threads complete | Observed at |
+| ---: | ---: | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 14 | 4 | abcdef123456 | approved | approved | false | false | true | true | true | 2026-01-01T00:00:00.000Z |
+
+## Limitations
+
+- Local audit and state are observations, not authenticated provider truth or action permission.
+- Audit and state are read separately; hashes identify bytes but cannot prove a common atomic snapshot.
+- Plans and intents do not prove execution; recorded success does not prove provider outcome.
+- Merge eligibility, merge execution, issue closure, and verified completion are distinct.
+- Unknown actor provenance exists.
+
+",
+}
+`;
+
+exports[`engineering history golden reports > duplicates 1`] = `
+{
+  "json": "{
+  "version": 2,
+  "input": {
+    "auditSha256": "c99959ca595c7cdd5dfc2a346512ed59d71ab4c0d3bb1b7bc3f95e0c7475a769",
+    "stateSha256": "90635f177945d631eca7d5922426cbfb3fa4e1bc1056de9d03f0fea57b5b8ae7"
+  },
+  "repository": "KevoCodo/ai-delivery-lab",
+  "summary": {
+    "eventCount": 3,
+    "eventTypes": {
+      "observation": 2,
+      "observation.replayed": 1
+    },
+    "provenance": {
+      "fixture": 3
+    }
+  },
+  "events": [
+    {
+      "sequence": 1,
+      "version": 2,
+      "eventId": "event-1",
+      "type": "observation",
+      "timestamp": "2026-01-01T00:00:00.000Z",
+      "correlationId": "unavailable",
+      "operationKey": "unavailable",
+      "actor": "unavailable",
+      "actorProvenance": "unavailable",
+      "authority": "unverified",
+      "source": "fixture",
+      "evidenceRef": "fixture-1",
+      "issueNumber": 4,
+      "sessionId": "unavailable",
+      "pullRequestNumber": null,
+      "headSha": "unavailable",
+      "authorization": "unavailable",
+      "category": "observation",
+      "outcome": "unavailable",
+      "retryOf": "unavailable",
+      "data": {
+        "issueNumber": 4
+      }
+    },
+    {
+      "sequence": 2,
+      "version": 2,
+      "eventId": "event-1",
+      "type": "observation",
+      "timestamp": "2026-01-01T00:00:00.000Z",
+      "correlationId": "unavailable",
+      "operationKey": "unavailable",
+      "actor": "unavailable",
+      "actorProvenance": "unavailable",
+      "authority": "unverified",
+      "source": "fixture",
+      "evidenceRef": "fixture-1",
+      "issueNumber": 4,
+      "sessionId": "unavailable",
+      "pullRequestNumber": null,
+      "headSha": "unavailable",
+      "authorization": "unavailable",
+      "category": "observation",
+      "outcome": "unavailable",
+      "retryOf": "unavailable",
+      "data": {
+        "issueNumber": 4
+      }
+    },
+    {
+      "sequence": 3,
+      "version": 2,
+      "eventId": "event-2",
+      "type": "observation.replayed",
+      "timestamp": "2026-01-01T00:00:00.000Z",
+      "correlationId": "unavailable",
+      "operationKey": "unavailable",
+      "actor": "unavailable",
+      "actorProvenance": "unavailable",
+      "authority": "unverified",
+      "source": "fixture",
+      "evidenceRef": "fixture-1",
+      "issueNumber": 4,
+      "sessionId": "unavailable",
+      "pullRequestNumber": null,
+      "headSha": "unavailable",
+      "authorization": "unavailable",
+      "category": "observation",
+      "outcome": "unavailable",
+      "retryOf": "unavailable",
+      "data": {
+        "issueNumber": 4
+      }
+    }
+  ],
+  "history": [
+    {
+      "issueNumber": 4,
+      "epic": "unavailable",
+      "title": "Controller Project Skeleton",
+      "session": "session-4",
+      "branch": "issue-4",
+      "worktree": "E:/work/issue-4",
+      "pullRequest": "#14",
+      "head": "abcdef123456",
+      "ci": "successful (github; 2026-01-01T00:00:00.000Z)",
+      "nativeReview": "stored controller observation: approved (2026-01-01T00:00:00.000Z)",
+      "githubApproval": "stored controller observation: approved; observed at 2026-01-01T00:00:00.000Z; head abcdef123456; current GitHub verification unavailable",
+      "permissions": {
+        "builderAssignment": "unavailable",
+        "prPublication": "unavailable",
+        "nativeAoReview": "unavailable",
+        "correctionDispatch": "unavailable",
+        "githubMerge": "unavailable",
+        "githubIssueClosure": "unavailable"
+      },
+      "securityDecision": "controller STOP active; action blocked",
+      "recovery": "unavailable",
+      "usage": "unavailable",
+      "issueClosure": "unavailable",
+      "action": "No action evidence available",
+      "verifiedOutcome": "unavailable",
+      "completion": "unverified",
+      "blockers": [
+        "missing dependency/completion evidence",
+        "controller STOP active",
+        "authenticated authorization and verified provider outcome unavailable"
+      ]
+    }
+  ],
+  "state": {
+    "version": 2,
+    "updatedAt": "2026-01-01T00:00:00.000Z",
+    "operationStatuses": {},
+    "discoveryCount": 0,
+    "stopActive": true,
+    "pullRequests": [
+      {
+        "number": 14,
+        "issueNumber": 4,
+        "headSha": "abcdef123456",
+        "generation": 1,
+        "status": "successful",
+        "source": "github",
+        "observedAt": "2026-01-01T00:00:00.000Z"
+      }
+    ],
+    "nativeReviews": [
+      {
+        "number": 14,
+        "issueNumber": 4,
+        "headSha": "abcdef123456",
+        "decision": "approved",
+        "githubApproval": "approved",
+        "independentReviewer": true,
+        "findingsComplete": true,
+        "threadsComplete": true,
+        "observedAt": "2026-01-01T00:00:00.000Z",
+        "stale": false,
+        "unavailable": false
+      }
+    ]
+  },
+  "limitations": [
+    "Local audit and state are observations, not authenticated provider truth or action permission.",
+    "Audit and state are read separately; hashes identify bytes but cannot prove a common atomic snapshot.",
+    "Plans and intents do not prove execution; recorded success does not prove provider outcome.",
+    "Merge eligibility, merge execution, issue closure, and verified completion are distinct.",
+    "Unknown actor provenance exists.",
+    "Duplicate event IDs exist; replay cannot be ruled out."
+  ]
+}
+",
+  "markdown": "# Mission Control engineering history
+
+- Schema: 2
+- Repository: KevoCodo/ai-delivery-lab
+- Events: 3
+- Audit SHA-256: c99959ca595c7cdd5dfc2a346512ed59d71ab4c0d3bb1b7bc3f95e0c7475a769
+- State SHA-256: 90635f177945d631eca7d5922426cbfb3fa4e1bc1056de9d03f0fea57b5b8ae7
+
+## Workflow history
+
+### Issue #4
+
+- epic: unavailable
+- title: Controller Project Skeleton
+- session: session-4
+- branch: issue-4
+- worktree: E:/work/issue-4
+- pullRequest: #14
+- head: abcdef123456
+- ci: successful (github; 2026-01-01T00:00:00.000Z)
+- nativeReview: stored controller observation: approved (2026-01-01T00:00:00.000Z)
+- githubApproval: stored controller observation: approved; observed at 2026-01-01T00:00:00.000Z; head abcdef123456; current GitHub verification unavailable
+- Authorization evidence:
+  - Builder assignment: unavailable
+  - PR publication: unavailable
+  - Native AO review: unavailable
+  - Correction dispatch: unavailable
+  - GitHub merge: unavailable
+  - GitHub issue closure: unavailable
+- securityDecision: controller STOP active; action blocked
+- recovery: unavailable
+- usage: unavailable
+- issueClosure: unavailable
+- action: No action evidence available
+- verifiedOutcome: unavailable
+- completion: unverified
+- Blockers:
+  - missing dependency/completion evidence
+  - controller STOP active
+  - authenticated authorization and verified provider outcome unavailable
+
+## Event types
+
+| Type | Count |
+| --- | ---: |
+| observation | 2 |
+| observation.replayed | 1 |
+
+## Evidence provenance
+
+| Source | Count |
+| --- | ---: |
+| fixture | 3 |
+
+## Events
+
+### 1. observation
+
+- eventId: event-1
+- version: 2
+- timestamp: 2026-01-01T00:00:00.000Z
+- correlationId: unavailable
+- operationKey: unavailable
+- actor: unavailable
+- actorProvenance: unavailable
+- authority: unverified
+- source: fixture
+- evidenceRef: fixture-1
+- issueNumber: 4
+- sessionId: unavailable
+- pullRequestNumber: unavailable
+- headSha: unavailable
+- authorization: unavailable
+- category: observation
+- outcome: unavailable
+- retryOf: unavailable
+
+Data:
+
+~~~json
+{
+  "issueNumber": 4
+}
+~~~
+
+### 2. observation
+
+- eventId: event-1
+- version: 2
+- timestamp: 2026-01-01T00:00:00.000Z
+- correlationId: unavailable
+- operationKey: unavailable
+- actor: unavailable
+- actorProvenance: unavailable
+- authority: unverified
+- source: fixture
+- evidenceRef: fixture-1
+- issueNumber: 4
+- sessionId: unavailable
+- pullRequestNumber: unavailable
+- headSha: unavailable
+- authorization: unavailable
+- category: observation
+- outcome: unavailable
+- retryOf: unavailable
+
+Data:
+
+~~~json
+{
+  "issueNumber": 4
+}
+~~~
+
+### 3. observation.replayed
+
+- eventId: event-2
+- version: 2
+- timestamp: 2026-01-01T00:00:00.000Z
+- correlationId: unavailable
+- operationKey: unavailable
+- actor: unavailable
+- actorProvenance: unavailable
+- authority: unverified
+- source: fixture
+- evidenceRef: fixture-1
+- issueNumber: 4
+- sessionId: unavailable
+- pullRequestNumber: unavailable
+- headSha: unavailable
+- authorization: unavailable
+- category: observation
+- outcome: unavailable
+- retryOf: unavailable
+
+Data:
+
+~~~json
+{
+  "issueNumber": 4
+}
+~~~
+
+## State snapshot
+
+- Version: 2
+- Updated at: 2026-01-01T00:00:00.000Z
+- Discovery records: 0
+- Controller STOP active: true
+- PR observations: 1
+- Native review observations: 1
+
+### Operation statuses
+
+| Status | Count |
+| --- | ---: |
+
+### PR observations
+
+| PR | Issue | Head | Generation | Status | Source | Observed at |
+| ---: | ---: | --- | ---: | --- | --- | --- |
+| 14 | 4 | abcdef123456 | 1 | successful | github | 2026-01-01T00:00:00.000Z |
+
+### Native review observations
+
+| PR | Issue | Head | Native decision | Stored GitHub approval observation | Stale | Unavailable | Independent reviewer | Findings complete | Threads complete | Observed at |
+| ---: | ---: | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 14 | 4 | abcdef123456 | approved | approved | false | false | true | true | true | 2026-01-01T00:00:00.000Z |
+
+## Limitations
+
+- Local audit and state are observations, not authenticated provider truth or action permission.
+- Audit and state are read separately; hashes identify bytes but cannot prove a common atomic snapshot.
+- Plans and intents do not prove execution; recorded success does not prove provider outcome.
+- Merge eligibility, merge execution, issue closure, and verified completion are distinct.
+- Unknown actor provenance exists.
+- Duplicate event IDs exist; replay cannot be ruled out.
+
+",
+}
+`;
+
+exports[`engineering history golden reports > incomplete 1`] = `
+{
+  "json": "{
+  "version": 2,
+  "input": {
+    "auditSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "repository": "unavailable",
+  "summary": {
+    "eventCount": 0,
+    "eventTypes": {},
+    "provenance": {}
+  },
+  "events": [],
+  "history": [],
+  "limitations": [
+    "Local audit and state are observations, not authenticated provider truth or action permission.",
+    "Audit and state are read separately; hashes identify bytes but cannot prove a common atomic snapshot.",
+    "Plans and intents do not prove execution; recorded success does not prove provider outcome.",
+    "Merge eligibility, merge execution, issue closure, and verified completion are distinct.",
+    "Missing state snapshot; verified completion is unavailable.",
+    "Missing audit history."
+  ]
+}
+",
+  "markdown": "# Mission Control engineering history
+
+- Schema: 2
+- Repository: unavailable
+- Events: 0
+- Audit SHA-256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+- State SHA-256: unavailable
+
+## Workflow history
+
+## Event types
+
+| Type | Count |
+| --- | ---: |
+
+## Evidence provenance
+
+| Source | Count |
+| --- | ---: |
+
+## Events
+
+## Limitations
+
+- Local audit and state are observations, not authenticated provider truth or action permission.
+- Audit and state are read separately; hashes identify bytes but cannot prove a common atomic snapshot.
+- Plans and intents do not prove execution; recorded success does not prove provider outcome.
+- Merge eligibility, merge execution, issue closure, and verified completion are distinct.
+- Missing state snapshot; verified completion is unavailable.
+- Missing audit history.
+
+",
+}
+`;
+
+exports[`engineering history golden reports > injection 1`] = `
+{
+  "json": "{
+  "version": 2,
+  "input": {
+    "auditSha256": "d6dfe6d7e3c340e1ec7c15ab578b97acb2b5af35dce8490e8a0f12e3decf564d",
+    "stateSha256": "e866b94e4bddc5f4bf3eb4c980e89ada6174ef6c5ba447b8fbc569a80e8cc7f1"
+  },
+  "repository": "KevoCodo/ai-delivery-lab",
+  "summary": {
+    "eventCount": 1,
+    "eventTypes": {
+      "x|y\\n<script>alert(1)</script>": 1
+    },
+    "provenance": {
+      "fixture": 1
+    }
+  },
+  "events": [
+    {
+      "sequence": 1,
+      "version": 2,
+      "eventId": "event-1",
+      "type": "x|y\\n<script>alert(1)</script>",
+      "timestamp": "2026-01-01T00:00:00.000Z",
+      "correlationId": "unavailable",
+      "operationKey": "unavailable",
+      "actor": "human",
+      "actorProvenance": "spoofed",
+      "authority": "unverified",
+      "source": "fixture",
+      "evidenceRef": "fixture-1",
+      "issueNumber": 4,
+      "sessionId": "unavailable",
+      "pullRequestNumber": null,
+      "headSha": "unavailable",
+      "authorization": "claimed-verified; unauthenticated",
+      "category": "observation",
+      "outcome": "unavailable",
+      "retryOf": "unavailable",
+      "data": {
+        "token": "[REDACTED]",
+        "nested": [
+          {
+            "password": "[REDACTED]"
+          }
+        ],
+        "note": "[REDACTED]\\n<script>alert(1)</script> | [link](javascript:alert(1))",
+        "html": "<img src=x onerror=alert(1)>",
+        "control": "a\\u0000b"
+      }
+    }
+  ],
+  "history": [
+    {
+      "issueNumber": 4,
+      "epic": "unavailable",
+      "title": "<script>alert(1)</script> | [click](javascript:alert(1))",
+      "session": "session-4",
+      "branch": "issue-4",
+      "worktree": "E:/work/issue-4",
+      "pullRequest": "unavailable",
+      "head": "unavailable",
+      "ci": "unavailable",
+      "nativeReview": "unavailable",
+      "githubApproval": "unavailable",
+      "permissions": {
+        "builderAssignment": "unavailable",
+        "prPublication": "unavailable",
+        "nativeAoReview": "unavailable",
+        "correctionDispatch": "unavailable",
+        "githubMerge": "unavailable",
+        "githubIssueClosure": "unavailable"
+      },
+      "securityDecision": "controller STOP active; action blocked",
+      "recovery": "unavailable",
+      "usage": "unavailable",
+      "issueClosure": "unavailable",
+      "action": "No action evidence available",
+      "verifiedOutcome": "unavailable",
+      "completion": "unverified",
+      "blockers": [
+        "missing dependency/completion evidence",
+        "missing PR and exact-head CI observation",
+        "missing exact-head independent review",
+        "controller STOP active",
+        "authenticated authorization and verified provider outcome unavailable"
+      ]
+    }
+  ],
+  "state": {
+    "version": 2,
+    "updatedAt": "2026-01-01T00:00:00.000Z",
+    "operationStatuses": {},
+    "discoveryCount": 0,
+    "stopActive": true,
+    "pullRequests": [],
+    "nativeReviews": []
+  },
+  "limitations": [
+    "Local audit and state are observations, not authenticated provider truth or action permission.",
+    "Audit and state are read separately; hashes identify bytes but cannot prove a common atomic snapshot.",
+    "Plans and intents do not prove execution; recorded success does not prove provider outcome.",
+    "Merge eligibility, merge execution, issue closure, and verified completion are distinct."
+  ]
+}
+",
+  "markdown": "# Mission Control engineering history
+
+- Schema: 2
+- Repository: KevoCodo/ai-delivery-lab
+- Events: 1
+- Audit SHA-256: d6dfe6d7e3c340e1ec7c15ab578b97acb2b5af35dce8490e8a0f12e3decf564d
+- State SHA-256: e866b94e4bddc5f4bf3eb4c980e89ada6174ef6c5ba447b8fbc569a80e8cc7f1
+
+## Workflow history
+
+### Issue #4
+
+- epic: unavailable
+- title: &lt;script&gt;alert(1)&lt;/script&gt; &#124; &#91;click&#93;(javascript:alert(1))
+- session: session-4
+- branch: issue-4
+- worktree: E:/work/issue-4
+- pullRequest: unavailable
+- head: unavailable
+- ci: unavailable
+- nativeReview: unavailable
+- githubApproval: unavailable
+- Authorization evidence:
+  - Builder assignment: unavailable
+  - PR publication: unavailable
+  - Native AO review: unavailable
+  - Correction dispatch: unavailable
+  - GitHub merge: unavailable
+  - GitHub issue closure: unavailable
+- securityDecision: controller STOP active; action blocked
+- recovery: unavailable
+- usage: unavailable
+- issueClosure: unavailable
+- action: No action evidence available
+- verifiedOutcome: unavailable
+- completion: unverified
+- Blockers:
+  - missing dependency/completion evidence
+  - missing PR and exact-head CI observation
+  - missing exact-head independent review
+  - controller STOP active
+  - authenticated authorization and verified provider outcome unavailable
+
+## Event types
+
+| Type | Count |
+| --- | ---: |
+| x&#124;y &lt;script&gt;alert(1)&lt;/script&gt; | 1 |
+
+## Evidence provenance
+
+| Source | Count |
+| --- | ---: |
+| fixture | 1 |
+
+## Events
+
+### 1. x&#124;y &lt;script&gt;alert(1)&lt;/script&gt;
+
+- eventId: event-1
+- version: 2
+- timestamp: 2026-01-01T00:00:00.000Z
+- correlationId: unavailable
+- operationKey: unavailable
+- actor: human
+- actorProvenance: spoofed
+- authority: unverified
+- source: fixture
+- evidenceRef: fixture-1
+- issueNumber: 4
+- sessionId: unavailable
+- pullRequestNumber: unavailable
+- headSha: unavailable
+- authorization: claimed-verified; unauthenticated
+- category: observation
+- outcome: unavailable
+- retryOf: unavailable
+
+Data:
+
+~~~json
+{
+  "token": "&#91;REDACTED&#93;",
+  "nested": &#91;
+    {
+      "password": "&#91;REDACTED&#93;"
+    }
+  &#93;,
+  "note": "&#91;REDACTED&#93;\\n&lt;script&gt;alert(1)&lt;/script&gt; &#124; &#91;link&#93;(javascript:alert(1))",
+  "html": "&lt;img src=x onerror=alert(1)&gt;",
+  "control": "a\\u0000b"
+}
+~~~
+
+## State snapshot
+
+- Version: 2
+- Updated at: 2026-01-01T00:00:00.000Z
+- Discovery records: 0
+- Controller STOP active: true
+- PR observations: 0
+- Native review observations: 0
+
+### Operation statuses
+
+| Status | Count |
+| --- | ---: |
+
+### PR observations
+
+| PR | Issue | Head | Generation | Status | Source | Observed at |
+| ---: | ---: | --- | ---: | --- | --- | --- |
+
+### Native review observations
+
+| PR | Issue | Head | Native decision | Stored GitHub approval observation | Stale | Unavailable | Independent reviewer | Findings complete | Threads complete | Observed at |
+| ---: | ---: | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+
+## Limitations
+
+- Local audit and state are observations, not authenticated provider truth or action permission.
+- Audit and state are read separately; hashes identify bytes but cannot prove a common atomic snapshot.
+- Plans and intents do not prove execution; recorded success does not prove provider outcome.
+- Merge eligibility, merge execution, issue closure, and verified completion are distinct.
+
+",
+}
+`;
+
+exports[`engineering history golden reports > recovered 1`] = `
+{
+  "json": "{
+  "version": 2,
+  "input": {
+    "auditSha256": "dfe4d1ac71ff2e8b6e30f415581dd08ae5cf69d468ccb1d5eb42e8f503424052",
+    "stateSha256": "3c54dea63a8e1c41cb6a08d881b4257bce09fa4aa7b509d7629b3eef2eeb138e"
+  },
+  "repository": "KevoCodo/ai-delivery-lab",
+  "summary": {
+    "eventCount": 2,
+    "eventTypes": {
+      "observation": 1,
+      "operation.recovered": 1
+    },
+    "provenance": {
+      "fixture": 2
+    }
+  },
+  "events": [
+    {
+      "sequence": 1,
+      "version": 2,
+      "eventId": "event-1",
+      "type": "observation",
+      "timestamp": "2026-01-01T00:00:00.000Z",
+      "correlationId": "unavailable",
+      "operationKey": "unavailable",
+      "actor": "unavailable",
+      "actorProvenance": "unavailable",
+      "authority": "unverified",
+      "source": "fixture",
+      "evidenceRef": "fixture-1",
+      "issueNumber": 4,
+      "sessionId": "unavailable",
+      "pullRequestNumber": null,
+      "headSha": "unavailable",
+      "authorization": "unavailable",
+      "category": "observation",
+      "outcome": "unavailable",
+      "retryOf": "unavailable",
+      "data": {
+        "issueNumber": 4
+      }
+    },
+    {
+      "sequence": 2,
+      "version": 2,
+      "eventId": "recovery-1",
+      "type": "operation.recovered",
+      "timestamp": "2026-01-01T00:00:00.000Z",
+      "correlationId": "unavailable",
+      "operationKey": "unavailable",
+      "actor": "unavailable",
+      "actorProvenance": "unavailable",
+      "authority": "unverified",
+      "source": "fixture",
+      "evidenceRef": "fixture-1",
+      "issueNumber": 4,
+      "sessionId": "unavailable",
+      "pullRequestNumber": null,
+      "headSha": "unavailable",
+      "authorization": "unavailable",
+      "category": "recovery",
+      "outcome": "succeeded",
+      "retryOf": "event-1",
+      "data": {
+        "issueNumber": 4,
+        "recovery": "provider reconciled",
+        "usage": {
+          "tokens": "[REDACTED]"
+        }
+      }
+    }
+  ],
+  "history": [
+    {
+      "issueNumber": 4,
+      "epic": "unavailable",
+      "title": "Controller Project Skeleton",
+      "session": "session-4",
+      "branch": "issue-4",
+      "worktree": "E:/work/issue-4",
+      "pullRequest": "#14",
+      "head": "abcdef123456",
+      "ci": "successful (github; 2026-01-01T00:00:00.000Z)",
+      "nativeReview": "stored controller observation: approved (2026-01-01T00:00:00.000Z)",
+      "githubApproval": "stored controller observation: approved; observed at 2026-01-01T00:00:00.000Z; head abcdef123456; current GitHub verification unavailable",
+      "permissions": {
+        "builderAssignment": "unavailable",
+        "prPublication": "unavailable",
+        "nativeAoReview": "unavailable",
+        "correctionDispatch": "unavailable",
+        "githubMerge": "unavailable",
+        "githubIssueClosure": "unavailable"
+      },
+      "securityDecision": "controller STOP active; action blocked",
+      "recovery": "operation.recovered: succeeded; retry of event-1",
+      "usage": "{\\"tokens\\":\\"[REDACTED]\\"}",
+      "issueClosure": "unavailable",
+      "action": "No action evidence available",
+      "verifiedOutcome": "unavailable",
+      "completion": "unverified",
+      "blockers": [
+        "missing dependency/completion evidence",
+        "controller STOP active",
+        "authenticated authorization and verified provider outcome unavailable"
+      ]
+    }
+  ],
+  "state": {
+    "version": 2,
+    "updatedAt": "2026-01-01T00:00:00.000Z",
+    "operationStatuses": {},
+    "discoveryCount": 0,
+    "stopActive": true,
+    "pullRequests": [
+      {
+        "number": 14,
+        "issueNumber": 4,
+        "headSha": "abcdef123456",
+        "generation": 1,
+        "status": "successful",
+        "source": "github",
+        "observedAt": "2026-01-01T00:00:00.000Z"
+      }
+    ],
+    "nativeReviews": [
+      {
+        "number": 14,
+        "issueNumber": 4,
+        "headSha": "abcdef123456",
+        "decision": "approved",
+        "githubApproval": "approved",
+        "independentReviewer": true,
+        "findingsComplete": true,
+        "threadsComplete": true,
+        "observedAt": "2026-01-01T00:00:00.000Z",
+        "stale": false,
+        "unavailable": false
+      }
+    ]
+  },
+  "limitations": [
+    "Local audit and state are observations, not authenticated provider truth or action permission.",
+    "Audit and state are read separately; hashes identify bytes but cannot prove a common atomic snapshot.",
+    "Plans and intents do not prove execution; recorded success does not prove provider outcome.",
+    "Merge eligibility, merge execution, issue closure, and verified completion are distinct.",
+    "Unknown actor provenance exists."
+  ]
+}
+",
+  "markdown": "# Mission Control engineering history
+
+- Schema: 2
+- Repository: KevoCodo/ai-delivery-lab
+- Events: 2
+- Audit SHA-256: dfe4d1ac71ff2e8b6e30f415581dd08ae5cf69d468ccb1d5eb42e8f503424052
+- State SHA-256: 3c54dea63a8e1c41cb6a08d881b4257bce09fa4aa7b509d7629b3eef2eeb138e
+
+## Workflow history
+
+### Issue #4
+
+- epic: unavailable
+- title: Controller Project Skeleton
+- session: session-4
+- branch: issue-4
+- worktree: E:/work/issue-4
+- pullRequest: #14
+- head: abcdef123456
+- ci: successful (github; 2026-01-01T00:00:00.000Z)
+- nativeReview: stored controller observation: approved (2026-01-01T00:00:00.000Z)
+- githubApproval: stored controller observation: approved; observed at 2026-01-01T00:00:00.000Z; head abcdef123456; current GitHub verification unavailable
+- Authorization evidence:
+  - Builder assignment: unavailable
+  - PR publication: unavailable
+  - Native AO review: unavailable
+  - Correction dispatch: unavailable
+  - GitHub merge: unavailable
+  - GitHub issue closure: unavailable
+- securityDecision: controller STOP active; action blocked
+- recovery: operation.recovered: succeeded; retry of event-1
+- usage: {"tokens":"&#91;REDACTED&#93;"}
+- issueClosure: unavailable
+- action: No action evidence available
+- verifiedOutcome: unavailable
+- completion: unverified
+- Blockers:
+  - missing dependency/completion evidence
+  - controller STOP active
+  - authenticated authorization and verified provider outcome unavailable
+
+## Event types
+
+| Type | Count |
+| --- | ---: |
+| observation | 1 |
+| operation.recovered | 1 |
+
+## Evidence provenance
+
+| Source | Count |
+| --- | ---: |
+| fixture | 2 |
+
+## Events
+
+### 1. observation
+
+- eventId: event-1
+- version: 2
+- timestamp: 2026-01-01T00:00:00.000Z
+- correlationId: unavailable
+- operationKey: unavailable
+- actor: unavailable
+- actorProvenance: unavailable
+- authority: unverified
+- source: fixture
+- evidenceRef: fixture-1
+- issueNumber: 4
+- sessionId: unavailable
+- pullRequestNumber: unavailable
+- headSha: unavailable
+- authorization: unavailable
+- category: observation
+- outcome: unavailable
+- retryOf: unavailable
+
+Data:
+
+~~~json
+{
+  "issueNumber": 4
+}
+~~~
+
+### 2. operation.recovered
+
+- eventId: recovery-1
+- version: 2
+- timestamp: 2026-01-01T00:00:00.000Z
+- correlationId: unavailable
+- operationKey: unavailable
+- actor: unavailable
+- actorProvenance: unavailable
+- authority: unverified
+- source: fixture
+- evidenceRef: fixture-1
+- issueNumber: 4
+- sessionId: unavailable
+- pullRequestNumber: unavailable
+- headSha: unavailable
+- authorization: unavailable
+- category: recovery
+- outcome: succeeded
+- retryOf: event-1
+
+Data:
+
+~~~json
+{
+  "issueNumber": 4,
+  "recovery": "provider reconciled",
+  "usage": {
+    "tokens": "&#91;REDACTED&#93;"
+  }
+}
+~~~
+
+## State snapshot
+
+- Version: 2
+- Updated at: 2026-01-01T00:00:00.000Z
+- Discovery records: 0
+- Controller STOP active: true
+- PR observations: 1
+- Native review observations: 1
+
+### Operation statuses
+
+| Status | Count |
+| --- | ---: |
+
+### PR observations
+
+| PR | Issue | Head | Generation | Status | Source | Observed at |
+| ---: | ---: | --- | ---: | --- | --- | --- |
+| 14 | 4 | abcdef123456 | 1 | successful | github | 2026-01-01T00:00:00.000Z |
+
+### Native review observations
+
+| PR | Issue | Head | Native decision | Stored GitHub approval observation | Stale | Unavailable | Independent reviewer | Findings complete | Threads complete | Observed at |
+| ---: | ---: | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 14 | 4 | abcdef123456 | approved | approved | false | false | true | true | true | 2026-01-01T00:00:00.000Z |
+
+## Limitations
+
+- Local audit and state are observations, not authenticated provider truth or action permission.
+- Audit and state are read separately; hashes identify bytes but cannot prove a common atomic snapshot.
+- Plans and intents do not prove execution; recorded success does not prove provider outcome.
+- Merge eligibility, merge execution, issue closure, and verified completion are distinct.
+- Unknown actor provenance exists.
+
+",
+}
+`;
+
+exports[`engineering history golden reports > stale 1`] = `
+{
+  "json": "{
+  "version": 2,
+  "input": {
+    "auditSha256": "1ef1c6ad9c75c2074606b8a99a2ffe20d617ae4bc92a9c89125f5c5afdec1fe4",
+    "stateSha256": "dbf173862ee63311881db9c83bed721422f60e7bc0229cb5983cf48494eeed2c"
+  },
+  "repository": "KevoCodo/ai-delivery-lab",
+  "summary": {
+    "eventCount": 1,
+    "eventTypes": {
+      "observation": 1
+    },
+    "provenance": {
+      "fixture": 1
+    }
+  },
+  "events": [
+    {
+      "sequence": 1,
+      "version": 2,
+      "eventId": "event-1",
+      "type": "observation",
+      "timestamp": "2026-01-01T00:00:00.000Z",
+      "correlationId": "unavailable",
+      "operationKey": "unavailable",
+      "actor": "unavailable",
+      "actorProvenance": "unavailable",
+      "authority": "unverified",
+      "source": "fixture",
+      "evidenceRef": "fixture-1",
+      "issueNumber": 4,
+      "sessionId": "unavailable",
+      "pullRequestNumber": null,
+      "headSha": "unavailable",
+      "authorization": "unavailable",
+      "category": "observation",
+      "outcome": "unavailable",
+      "retryOf": "unavailable",
+      "data": {
+        "issueNumber": 4
+      }
+    }
+  ],
+  "history": [
+    {
+      "issueNumber": 4,
+      "epic": "unavailable",
+      "title": "Controller Project Skeleton",
+      "session": "session-4",
+      "branch": "issue-4",
+      "worktree": "E:/work/issue-4",
+      "pullRequest": "#14",
+      "head": "abcdef123456",
+      "ci": "successful (github; 2026-01-01T00:00:00.000Z)",
+      "nativeReview": "unavailable",
+      "githubApproval": "unavailable",
+      "permissions": {
+        "builderAssignment": "unavailable",
+        "prPublication": "unavailable",
+        "nativeAoReview": "unavailable",
+        "correctionDispatch": "unavailable",
+        "githubMerge": "unavailable",
+        "githubIssueClosure": "unavailable"
+      },
+      "securityDecision": "controller STOP active; action blocked",
+      "recovery": "unavailable",
+      "usage": "unavailable",
+      "issueClosure": "unavailable",
+      "action": "No action evidence available",
+      "verifiedOutcome": "unavailable",
+      "completion": "unverified",
+      "blockers": [
+        "missing dependency/completion evidence",
+        "CI stale, unsuccessful, unavailable, or provider evidence incomplete",
+        "missing exact-head independent review",
+        "controller STOP active",
+        "authenticated authorization and verified provider outcome unavailable"
+      ]
+    }
+  ],
+  "state": {
+    "version": 2,
+    "updatedAt": "2026-01-01T00:00:00.000Z",
+    "operationStatuses": {},
+    "discoveryCount": 0,
+    "stopActive": true,
+    "pullRequests": [
+      {
+        "number": 14,
+        "issueNumber": 4,
+        "headSha": "abcdef123456",
+        "generation": 1,
+        "status": "successful",
+        "source": "github",
+        "observedAt": "2026-01-01T00:00:00.000Z"
+      }
+    ],
+    "nativeReviews": [
+      {
+        "number": 14,
+        "issueNumber": 4,
+        "headSha": "old-head",
+        "decision": "approved",
+        "githubApproval": "approved",
+        "independentReviewer": true,
+        "findingsComplete": true,
+        "threadsComplete": true,
+        "observedAt": "2026-01-01T00:00:00.000Z",
+        "stale": false,
+        "unavailable": false
+      }
+    ]
+  },
+  "limitations": [
+    "Local audit and state are observations, not authenticated provider truth or action permission.",
+    "Audit and state are read separately; hashes identify bytes but cannot prove a common atomic snapshot.",
+    "Plans and intents do not prove execution; recorded success does not prove provider outcome.",
+    "Merge eligibility, merge execution, issue closure, and verified completion are distinct.",
+    "Unknown actor provenance exists.",
+    "Stale or unavailable observations exist."
+  ]
+}
+",
+  "markdown": "# Mission Control engineering history
+
+- Schema: 2
+- Repository: KevoCodo/ai-delivery-lab
+- Events: 1
+- Audit SHA-256: 1ef1c6ad9c75c2074606b8a99a2ffe20d617ae4bc92a9c89125f5c5afdec1fe4
+- State SHA-256: dbf173862ee63311881db9c83bed721422f60e7bc0229cb5983cf48494eeed2c
+
+## Workflow history
+
+### Issue #4
+
+- epic: unavailable
+- title: Controller Project Skeleton
+- session: session-4
+- branch: issue-4
+- worktree: E:/work/issue-4
+- pullRequest: #14
+- head: abcdef123456
+- ci: successful (github; 2026-01-01T00:00:00.000Z)
+- nativeReview: unavailable
+- githubApproval: unavailable
+- Authorization evidence:
+  - Builder assignment: unavailable
+  - PR publication: unavailable
+  - Native AO review: unavailable
+  - Correction dispatch: unavailable
+  - GitHub merge: unavailable
+  - GitHub issue closure: unavailable
+- securityDecision: controller STOP active; action blocked
+- recovery: unavailable
+- usage: unavailable
+- issueClosure: unavailable
+- action: No action evidence available
+- verifiedOutcome: unavailable
+- completion: unverified
+- Blockers:
+  - missing dependency/completion evidence
+  - CI stale, unsuccessful, unavailable, or provider evidence incomplete
+  - missing exact-head independent review
+  - controller STOP active
+  - authenticated authorization and verified provider outcome unavailable
+
+## Event types
+
+| Type | Count |
+| --- | ---: |
+| observation | 1 |
+
+## Evidence provenance
+
+| Source | Count |
+| --- | ---: |
+| fixture | 1 |
+
+## Events
+
+### 1. observation
+
+- eventId: event-1
+- version: 2
+- timestamp: 2026-01-01T00:00:00.000Z
+- correlationId: unavailable
+- operationKey: unavailable
+- actor: unavailable
+- actorProvenance: unavailable
+- authority: unverified
+- source: fixture
+- evidenceRef: fixture-1
+- issueNumber: 4
+- sessionId: unavailable
+- pullRequestNumber: unavailable
+- headSha: unavailable
+- authorization: unavailable
+- category: observation
+- outcome: unavailable
+- retryOf: unavailable
+
+Data:
+
+~~~json
+{
+  "issueNumber": 4
+}
+~~~
+
+## State snapshot
+
+- Version: 2
+- Updated at: 2026-01-01T00:00:00.000Z
+- Discovery records: 0
+- Controller STOP active: true
+- PR observations: 1
+- Native review observations: 1
+
+### Operation statuses
+
+| Status | Count |
+| --- | ---: |
+
+### PR observations
+
+| PR | Issue | Head | Generation | Status | Source | Observed at |
+| ---: | ---: | --- | ---: | --- | --- | --- |
+| 14 | 4 | abcdef123456 | 1 | successful | github | 2026-01-01T00:00:00.000Z |
+
+### Native review observations
+
+| PR | Issue | Head | Native decision | Stored GitHub approval observation | Stale | Unavailable | Independent reviewer | Findings complete | Threads complete | Observed at |
+| ---: | ---: | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 14 | 4 | old-head | approved | approved | false | false | true | true | true | 2026-01-01T00:00:00.000Z |
+
+## Limitations
+
+- Local audit and state are observations, not authenticated provider truth or action permission.
+- Audit and state are read separately; hashes identify bytes but cannot prove a common atomic snapshot.
+- Plans and intents do not prove execution; recorded success does not prove provider outcome.
+- Merge eligibility, merge execution, issue closure, and verified completion are distinct.
+- Unknown actor provenance exists.
+- Stale or unavailable observations exist.
+
+",
+}
+`;
+
+exports[`engineering history golden reports > uncertain 1`] = `
+{
+  "json": "{
+  "version": 2,
+  "input": {
+    "auditSha256": "8a9612765ecd8df5e72862dbc214accc3b6ae4c3aae3023b982b08318d58d653",
+    "stateSha256": "992461aea18d3260f3baeef539d4a161abc3e3b5a5fa229dfc0873430aa539b7"
+  },
+  "repository": "KevoCodo/ai-delivery-lab",
+  "summary": {
+    "eventCount": 2,
+    "eventTypes": {
+      "merge.intent": 1,
+      "observation": 1
+    },
+    "provenance": {
+      "fixture": 2
+    }
+  },
+  "events": [
+    {
+      "sequence": 1,
+      "version": 2,
+      "eventId": "event-1",
+      "type": "observation",
+      "timestamp": "2026-01-01T00:00:00.000Z",
+      "correlationId": "unavailable",
+      "operationKey": "unavailable",
+      "actor": "unavailable",
+      "actorProvenance": "unavailable",
+      "authority": "unverified",
+      "source": "fixture",
+      "evidenceRef": "fixture-1",
+      "issueNumber": 4,
+      "sessionId": "unavailable",
+      "pullRequestNumber": null,
+      "headSha": "unavailable",
+      "authorization": "unavailable",
+      "category": "observation",
+      "outcome": "unavailable",
+      "retryOf": "unavailable",
+      "data": {
+        "issueNumber": 4
+      }
+    },
+    {
+      "sequence": 2,
+      "version": 2,
+      "eventId": "intent-1",
+      "type": "merge.intent",
+      "timestamp": "2026-01-01T00:00:00.000Z",
+      "correlationId": "unavailable",
+      "operationKey": "unavailable",
+      "actor": "unavailable",
+      "actorProvenance": "unavailable",
+      "authority": "unverified",
+      "source": "fixture",
+      "evidenceRef": "fixture-1",
+      "issueNumber": 4,
+      "sessionId": "unavailable",
+      "pullRequestNumber": null,
+      "headSha": "unavailable",
+      "authorization": "caller-claimed",
+      "category": "intent",
+      "outcome": "uncertain",
+      "retryOf": "unavailable",
+      "data": {
+        "issueNumber": 4
+      }
+    }
+  ],
+  "history": [
+    {
+      "issueNumber": 4,
+      "epic": "unavailable",
+      "title": "Controller Project Skeleton",
+      "session": "session-4",
+      "branch": "issue-4",
+      "worktree": "E:/work/issue-4",
+      "pullRequest": "#14",
+      "head": "abcdef123456",
+      "ci": "successful (github; 2026-01-01T00:00:00.000Z)",
+      "nativeReview": "stored controller observation: approved (2026-01-01T00:00:00.000Z)",
+      "githubApproval": "stored controller observation: approved; observed at 2026-01-01T00:00:00.000Z; head abcdef123456; current GitHub verification unavailable",
+      "permissions": {
+        "builderAssignment": "unavailable",
+        "prPublication": "unavailable",
+        "nativeAoReview": "unavailable",
+        "correctionDispatch": "unavailable",
+        "githubMerge": "recorded audit claim: caller-claimed (event intent-1); authority unverified",
+        "githubIssueClosure": "unavailable"
+      },
+      "securityDecision": "controller STOP active; action blocked",
+      "recovery": "unavailable",
+      "usage": "unavailable",
+      "issueClosure": "unavailable",
+      "action": "Controller operation uncertain: merge-pr (merge-14); provider verification unavailable",
+      "verifiedOutcome": "unavailable",
+      "completion": "unverified",
+      "blockers": [
+        "missing dependency/completion evidence",
+        "pending or uncertain operation",
+        "controller STOP active",
+        "authenticated authorization and verified provider outcome unavailable"
+      ]
+    }
+  ],
+  "state": {
+    "version": 2,
+    "updatedAt": "2026-01-01T00:00:00.000Z",
+    "operationStatuses": {
+      "uncertain": 1
+    },
+    "discoveryCount": 0,
+    "stopActive": true,
+    "pullRequests": [
+      {
+        "number": 14,
+        "issueNumber": 4,
+        "headSha": "abcdef123456",
+        "generation": 1,
+        "status": "successful",
+        "source": "github",
+        "observedAt": "2026-01-01T00:00:00.000Z"
+      }
+    ],
+    "nativeReviews": [
+      {
+        "number": 14,
+        "issueNumber": 4,
+        "headSha": "abcdef123456",
+        "decision": "approved",
+        "githubApproval": "approved",
+        "independentReviewer": true,
+        "findingsComplete": true,
+        "threadsComplete": true,
+        "observedAt": "2026-01-01T00:00:00.000Z",
+        "stale": false,
+        "unavailable": false
+      }
+    ]
+  },
+  "limitations": [
+    "Local audit and state are observations, not authenticated provider truth or action permission.",
+    "Audit and state are read separately; hashes identify bytes but cannot prove a common atomic snapshot.",
+    "Plans and intents do not prove execution; recorded success does not prove provider outcome.",
+    "Merge eligibility, merge execution, issue closure, and verified completion are distinct.",
+    "Unknown actor provenance exists.",
+    "Audit contains pending or uncertain outcomes.",
+    "Uncertain or pending operations require provider reconciliation."
+  ]
+}
+",
+  "markdown": "# Mission Control engineering history
+
+- Schema: 2
+- Repository: KevoCodo/ai-delivery-lab
+- Events: 2
+- Audit SHA-256: 8a9612765ecd8df5e72862dbc214accc3b6ae4c3aae3023b982b08318d58d653
+- State SHA-256: 992461aea18d3260f3baeef539d4a161abc3e3b5a5fa229dfc0873430aa539b7
+
+## Workflow history
+
+### Issue #4
+
+- epic: unavailable
+- title: Controller Project Skeleton
+- session: session-4
+- branch: issue-4
+- worktree: E:/work/issue-4
+- pullRequest: #14
+- head: abcdef123456
+- ci: successful (github; 2026-01-01T00:00:00.000Z)
+- nativeReview: stored controller observation: approved (2026-01-01T00:00:00.000Z)
+- githubApproval: stored controller observation: approved; observed at 2026-01-01T00:00:00.000Z; head abcdef123456; current GitHub verification unavailable
+- Authorization evidence:
+  - Builder assignment: unavailable
+  - PR publication: unavailable
+  - Native AO review: unavailable
+  - Correction dispatch: unavailable
+  - GitHub merge: recorded audit claim: caller-claimed (event intent-1); authority unverified
+  - GitHub issue closure: unavailable
+- securityDecision: controller STOP active; action blocked
+- recovery: unavailable
+- usage: unavailable
+- issueClosure: unavailable
+- action: Controller operation uncertain: merge-pr (merge-14); provider verification unavailable
+- verifiedOutcome: unavailable
+- completion: unverified
+- Blockers:
+  - missing dependency/completion evidence
+  - pending or uncertain operation
+  - controller STOP active
+  - authenticated authorization and verified provider outcome unavailable
+
+## Event types
+
+| Type | Count |
+| --- | ---: |
+| merge.intent | 1 |
+| observation | 1 |
+
+## Evidence provenance
+
+| Source | Count |
+| --- | ---: |
+| fixture | 2 |
+
+## Events
+
+### 1. observation
+
+- eventId: event-1
+- version: 2
+- timestamp: 2026-01-01T00:00:00.000Z
+- correlationId: unavailable
+- operationKey: unavailable
+- actor: unavailable
+- actorProvenance: unavailable
+- authority: unverified
+- source: fixture
+- evidenceRef: fixture-1
+- issueNumber: 4
+- sessionId: unavailable
+- pullRequestNumber: unavailable
+- headSha: unavailable
+- authorization: unavailable
+- category: observation
+- outcome: unavailable
+- retryOf: unavailable
+
+Data:
+
+~~~json
+{
+  "issueNumber": 4
+}
+~~~
+
+### 2. merge.intent
+
+- eventId: intent-1
+- version: 2
+- timestamp: 2026-01-01T00:00:00.000Z
+- correlationId: unavailable
+- operationKey: unavailable
+- actor: unavailable
+- actorProvenance: unavailable
+- authority: unverified
+- source: fixture
+- evidenceRef: fixture-1
+- issueNumber: 4
+- sessionId: unavailable
+- pullRequestNumber: unavailable
+- headSha: unavailable
+- authorization: caller-claimed
+- category: intent
+- outcome: uncertain
+- retryOf: unavailable
+
+Data:
+
+~~~json
+{
+  "issueNumber": 4
+}
+~~~
+
+## State snapshot
+
+- Version: 2
+- Updated at: 2026-01-01T00:00:00.000Z
+- Discovery records: 0
+- Controller STOP active: true
+- PR observations: 1
+- Native review observations: 1
+
+### Operation statuses
+
+| Status | Count |
+| --- | ---: |
+| uncertain | 1 |
+
+### PR observations
+
+| PR | Issue | Head | Generation | Status | Source | Observed at |
+| ---: | ---: | --- | ---: | --- | --- | --- |
+| 14 | 4 | abcdef123456 | 1 | successful | github | 2026-01-01T00:00:00.000Z |
+
+### Native review observations
+
+| PR | Issue | Head | Native decision | Stored GitHub approval observation | Stale | Unavailable | Independent reviewer | Findings complete | Threads complete | Observed at |
+| ---: | ---: | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 14 | 4 | abcdef123456 | approved | approved | false | false | true | true | true | 2026-01-01T00:00:00.000Z |
+
+## Limitations
+
+- Local audit and state are observations, not authenticated provider truth or action permission.
+- Audit and state are read separately; hashes identify bytes but cannot prove a common atomic snapshot.
+- Plans and intents do not prove execution; recorded success does not prove provider outcome.
+- Merge eligibility, merge execution, issue closure, and verified completion are distinct.
+- Unknown actor provenance exists.
+- Audit contains pending or uncertain outcomes.
+- Uncertain or pending operations require provider reconciliation.
+
+",
+}
+`;

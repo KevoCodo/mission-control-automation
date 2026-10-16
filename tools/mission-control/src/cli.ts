@@ -11,6 +11,7 @@ import { planAssignments } from './planner.js';
 import { PullRequestTrackingError, trackPullRequestChecks } from './prTracking.js';
 import { collectNativeReviewEvidence, NativeReviewEvidenceError } from './reviewEvidence.js';
 import { appendDiscovery } from './state.js';
+import { generateAuditReport, renderAuditReport } from './report.js';
 
 const HELP = `Mission Control
 
@@ -20,17 +21,20 @@ Usage:
   mission-control plan-assignments [--config <path>] [--state <path>]
   mission-control track-pr [--config <path>] [--state <path>] [--audit <path>] [--issue <number>] [--session <id>] [--branch <name>] [--head <sha>]
   mission-control review-evidence [--config <path>] [--state <path>] [--audit <path>] [--issue <number>] [--session <id>] [--branch <name>] [--head <sha>] [--authorize-review] [--authorize-correction]
+  mission-control report [--audit <path>] [--state <path>] [--format json|markdown]
 
 Commands:
   discover  Run read-only dry-run discovery using fixture adapters by default.
   plan-assignments  Print eligible, blocked, and capacity using state plus AO session status.
   track-pr  Print and persist read-only PR/CI status for an intended issue/session/branch.
   review-evidence  Print and persist read-only AO native review evidence for an exact PR head.
+  report  Print a deterministic, read-only audit report.
 
 Options:
   --config <path>  JSON config path. Defaults to safe dry-run config.
   --state <path>   State JSON path. Defaults to .mission-control/state.json.
   --audit <path>   Audit JSONL path. Defaults to .mission-control/audit.jsonl.
+  --format <name> JSON or Markdown report format. Defaults to JSON.
   --issue <number> Issue number for track-pr. Defaults to first configured issue.
   --session <id>   AO session id for track-pr. Defaults to first configured session.
   --branch <name>  Feature branch for track-pr. Defaults to selected session branch.
@@ -45,6 +49,7 @@ interface CliArgs {
   configPath?: string;
   statePath: string;
   auditPath: string;
+  format: 'json' | 'markdown';
   issueNumber?: number;
   sessionId?: string;
   branch?: string;
@@ -68,11 +73,15 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
       process.stdout.write(HELP);
       return 0;
     }
-    if (args.command !== 'discover' && args.command !== 'plan-assignments' && args.command !== 'track-pr' && args.command !== 'review-evidence') {
+    if (args.command !== 'discover' && args.command !== 'plan-assignments' && args.command !== 'track-pr' && args.command !== 'review-evidence' && args.command !== 'report') {
       process.stderr.write(`Unsupported command: ${args.command}\n`);
       return 1;
     }
 
+    if (args.command === 'report') {
+      process.stdout.write(renderAuditReport(await generateAuditReport(args.auditPath, args.statePath), args.format));
+      return 0;
+    }
     const config = await loadConfig(args.configPath);
     return await withControllerOwnership({ owner: 'mission-control-cli', lockPath: getDefaultControllerLockPath() }, async () => {
       if (args.command === 'plan-assignments') {
@@ -106,7 +115,14 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
         await appendAuditEvent(args.auditPath, {
           type: 'prTracking.completed',
           timestamp: new Date().toISOString(),
-          data: result.observation
+          issueNumber: result.observation.issueNumber,
+          sessionId: result.observation.sessionId,
+          pullRequestNumber: result.observation.pullRequestNumber,
+          headSha: result.observation.headSha,
+          category: 'observation',
+          outcome: result.observation.status === 'successful' ? 'succeeded' : 'unknown',
+          data: result.observation,
+          provenance: { source: result.observation.dataSource === 'github' ? 'github' : 'fixture', observedAt: result.observation.observedAt }
         });
         process.stdout.write(`${JSON.stringify(result.observation, null, 2)}\n`);
         return 0;
@@ -136,7 +152,15 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
         await appendAuditEvent(args.auditPath, {
           type: 'nativeReview.completed',
           timestamp: new Date().toISOString(),
-          data: result.observation
+          issueNumber: result.observation.issueNumber,
+          sessionId: result.observation.sessionId,
+          pullRequestNumber: result.observation.pullRequestNumber,
+          headSha: result.observation.headSha,
+          category: 'observation',
+          authorization: args.authorizeCorrection || args.authorizeReview ? 'caller-claimed' : 'unknown',
+          outcome: result.observation.runStatus === 'completed' ? 'succeeded' : 'unknown',
+          data: result.observation,
+          provenance: { source: 'fixture', observedAt: result.observation.observedAt }
         });
         process.stdout.write(`${JSON.stringify(result.observation, null, 2)}\n`);
         return 0;
@@ -147,7 +171,10 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
       await appendAuditEvent(args.auditPath, {
         type: 'discovery.completed',
         timestamp: new Date().toISOString(),
-        data: result
+        category: 'observation',
+        outcome: 'succeeded',
+        data: result,
+        provenance: { source: 'fixture' }
       });
       process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
       return 0;
@@ -169,6 +196,7 @@ export function parseArgs(argv: string[]): CliArgs {
   const args: CliArgs = {
     statePath: path.join('.mission-control', 'state.json'),
     auditPath: path.join('.mission-control', 'audit.jsonl'),
+    format: 'json',
     authorizeReview: false,
     authorizeCorrection: false,
     help: false
@@ -184,6 +212,10 @@ export function parseArgs(argv: string[]): CliArgs {
       args.statePath = readOptionValue(argv, ++index, '--state');
     } else if (arg === '--audit') {
       args.auditPath = readOptionValue(argv, ++index, '--audit');
+    } else if (arg === '--format') {
+      const format = readOptionValue(argv, ++index, '--format');
+      if (format !== 'json' && format !== 'markdown') throw new Error('--format must be json or markdown.');
+      args.format = format;
     } else if (arg === '--issue') {
       args.issueNumber = readPositiveInteger(readOptionValue(argv, ++index, '--issue'), '--issue');
     } else if (arg === '--session') {

@@ -18,6 +18,8 @@ node tools/mission-control/dist/cli.js --help
 node tools/mission-control/dist/cli.js discover --config tools/mission-control/examples/dry-run.config.json
 node tools/mission-control/dist/cli.js track-pr --config tools/mission-control/examples/dry-run.config.json
 node tools/mission-control/dist/cli.js review-evidence --config tools/mission-control/examples/dry-run.config.json
+node tools/mission-control/dist/cli.js report --audit .mission-control/audit.jsonl --state .mission-control/state.json --format json
+node tools/mission-control/dist/cli.js report --audit .mission-control/audit.jsonl --format markdown
 ```
 
 The CLI accepts `--config <path>` for a JSON file. Without a config file it uses
@@ -136,6 +138,35 @@ interleave read-modify-write repair work. Audit recovery reads, parses,
 validates, writes the repaired candidate, copies original bytes to quarantine
 evidence, and publishes the repaired canonical file while holding that audit
 transaction.
+
+## Audit reporting (Issue #12)
+
+New audit records use a version 2 envelope with a generated event ID, timestamp,
+type, and redacted data. Optional fields carry correlation and operation keys,
+actor ID and provenance claim, evidence reference, issue/session/PR identities,
+exact PR head, authorization state, intent/action category, outcome, and retry
+reference. Absent fields render as `unavailable`; the reporter never derives
+authority from a provider or actor label. Version 1 and unversioned legacy records
+remain readable. A caller authorization claim remains a claim. The dry-run CLI
+labels fixture observations as `fixture`.
+
+`report` reads the audit JSONL and optional state snapshot without changing
+either file. It rejects malformed events, unsupported versions, empty lines,
+and incomplete tails; repair remains a separate explicit operation. Reports
+contain events in log order, sorted summary counts, SHA-256 hashes of the exact
+input bytes, and a conservative engineering history per issue. The history
+links Epic, issue, AO session, branch/worktree, PR, exact-head CI, native review,
+GitHub-required approval, authorization, recorded action, and verified outcome.
+It lists blockers and never promotes intent, eligibility, a merely closed issue,
+or a recorded successful operation into verified completion. State and audit
+are read separately, so hashes cannot prove an atomic cross-file snapshot.
+Provider truth and actor authentication remain unavailable to this command.
+JSON schema version 2 and Markdown are deterministic for identical inputs:
+neither includes the current clock or local file paths. Redaction applies to
+legacy records at read time, and Markdown treats untrusted text as inert text.
+The evidence hierarchy is current authenticated provider state at the exact
+head, then controller state plus matching audit, then unauthenticated fixture
+or caller claims. This CLI accesses only local files and performs no repair.
 
 ## Controller Ownership
 
