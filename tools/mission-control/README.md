@@ -215,6 +215,41 @@ Baseline assessment on 2026-10-14 with Node 20.19.5, npm 10.8.2 and the `02d1571
 
 The scoped Issue #11 migration pinned Vitest 4.1.11 and updated only its necessary transitive graph. Vite remains 7.3.7 and Koffi remains 3.3.2. Vitest 4.1.11 declares Node `^20.0.0 || ^22.0.0 || >=24.0.0`, so the separately approved project range is `^20.19.0 || ^22.12.0 || >=24.0.0`; Node 23 is unsupported. Windows CI continues to use Node 20.19.0. After `npm ci`, full and production-only audits each exited 0 with zero findings, controller tests passed 252/252, full tests 253/253, and both builds passed locally. No advisory exception or audit suppression is in use. Residual limits: the pure policy relies on an authentic complete npm audit report supplied by its caller, and the exact PR head still requires Windows CI and independent review before any merge decision.
 
+## B3A scoped authorization records
+
+State schema v4 adds versioned authorization records, revocation events, consumed grant IDs,
+and a monotonic revocation epoch. Migration from v1, v2, or v3 creates empty authorization
+collections; v3 dispatch identities remain intact. Claim ingestion accepts only REQUESTED or
+UNVERIFIED records and writes an audit observation before changing state. Duplicate grant IDs,
+including conflicting contents, fail closed under the controller state lock. State writes reject
+VERIFIED records and fixture provenance. No approved issuer is wired into production.
+
+Revocation audit entries identify the grant holder separately. An initiating actor is omitted
+unless the caller supplies an ID, and that ID remains explicitly caller-claimed and unverified.
+The controller's audit observation does not verify a human or service initiator. Older B3A
+revocation records without initiator metadata remain readable; their absence implies no verified
+initiator. State loading rejects missing or extra revocation events, active grants with revocation
+events, duplicate event identities, noncontiguous or out-of-range epochs, and mismatched grant
+timestamps or issuance epochs. Contradictory records are rejected rather than migrated or repaired.
+Version 3 migration adds only empty authorization collections and preserves populated B2
+dispatch records, including uncertain delivery quarantine details. A legacy state with unexpected
+authorization evidence fails migration instead of having that evidence discarded.
+
+The pure `evaluateAuthorization` function accepts an explicit clock and test fixture issuance
+evidence to inspect scope. Its result never has verified permission or execution capability.
+`verifyCurrentPermission` is the production boundary and always returns
+`TRUSTED_ISSUER_UNAVAILABLE`. A caller claim, a stored record, an audit entry, and a test fixture
+are not human authorization. There is no environment or configuration switch to enable actions.
+
+Each grant binds an actor, repository, action, issue or PR, and for PR actions the exact head SHA.
+REVIEW, CORRECTION, MERGE, and CLOSURE are separate scopes. The evaluator rejects future issuance,
+expiration, revocation, stale epochs, replayed grant IDs, and missing or mismatched evidence.
+Revocation changes the historical record and increments the durable epoch; it cannot undo an
+external side effect already completed. The eventual trusted runtime must obtain current time
+from its own clock, verify issuer evidence independently, atomically consume a single-use grant,
+and recheck scope, revocation, STOP, exact head, provider truth, and policy immediately before any
+side effect. B3A supplies none of that execution capability. Live AO remains prohibited.
+
 ## Merge policy boundary
 
 `evaluateMergePolicy` is a pure, versioned, fail-closed assessment. It returns policy eligibility,

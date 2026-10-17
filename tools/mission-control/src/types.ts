@@ -1,4 +1,4 @@
-export const STATE_VERSION = 3;
+export const STATE_VERSION = 4;
 export const MIN_SUPPORTED_STATE_VERSION = 1;
 
 export type ExecutionMode = 'dry-run';
@@ -94,6 +94,47 @@ export interface DispatchRecord {
   providerReceiptRef?: string;
   evidence?: DispatchEvidence;
   quarantineReason?: string;
+}
+
+export type AuthorizationAction = 'ASSIGNMENT' | 'REVIEW' | 'CORRECTION' | 'MERGE' | 'CLOSURE';
+export type AuthorizationStatus = 'REQUESTED' | 'UNVERIFIED' | 'VERIFIED' | 'REVOKED' | 'EXPIRED';
+export interface AuthorizationRecord {
+  version: 1;
+  grantId: string;
+  issuerId: string;
+  issuerProvenance: string;
+  actorId: string;
+  action: AuthorizationAction;
+  repository: { owner: string; name: string };
+  target: { kind: 'issue' | 'pullRequest'; number: number };
+  issueNumber?: number;
+  pullRequestNumber?: number;
+  headSha?: string;
+  constraints: { maxUses: 1; purpose: string };
+  issuedAt: string;
+  expiresAt: string;
+  revocationEpoch: number;
+  status: AuthorizationStatus;
+  createdAt: string;
+  updatedAt: string;
+  correlationId: string;
+  auditEvidenceRef: string;
+}
+export interface AuthorizationRevocation {
+  grantId: string;
+  epoch: number;
+  revokedAt: string;
+  correlationId: string;
+  auditEvidenceRef: string;
+  /** Legacy events omit initiator metadata; absence never implies a verified initiator. */
+  initiatorProvenance?: 'unverified';
+  initiatorClaimedActorId?: string;
+}
+export interface AuthorizationState {
+  grants: AuthorizationRecord[];
+  revocations: AuthorizationRevocation[];
+  consumedGrantIds: string[];
+  revocationEpoch: number;
 }
 
 export interface StateSchemaMetadata {
@@ -335,6 +376,7 @@ export interface ControllerState {
   identities: IdentityMap;
   operations: OperationRecord[];
   dispatches: DispatchRecord[];
+  authorization: AuthorizationState;
   discoveries: DiscoveryResult[];
   pullRequestTracking: PullRequestTrackingObservation[];
   nativeReviewTracking: NativeReviewObservation[];

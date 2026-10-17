@@ -1,4 +1,5 @@
 export * from './audit.js';
+export * from './authorization.js';
 export * from './aoCliClient.js';
 export * from './assignment.js';
 export * from './clients.js';

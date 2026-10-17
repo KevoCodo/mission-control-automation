@@ -6,7 +6,7 @@ exports[`engineering history golden reports > blocked 1`] = `
   "version": 2,
   "input": {
     "auditSha256": "1ef1c6ad9c75c2074606b8a99a2ffe20d617ae4bc92a9c89125f5c5afdec1fe4",
-    "stateSha256": "ea66dd8838061f27b6c8d04772a4cfc8db99394925deb552bd1fd415d5bb09f9"
+    "stateSha256": "e2ddb7ee7c59f396d50c6d361d1f77fdcecd1b7fd8d56526c434c4731802a431"
   },
   "repository": "KevoCodo/ai-delivery-lab",
   "summary": {
@@ -82,7 +82,7 @@ exports[`engineering history golden reports > blocked 1`] = `
     }
   ],
   "state": {
-    "version": 3,
+    "version": 4,
     "updatedAt": "2026-01-01T00:00:00.000Z",
     "operationStatuses": {},
     "discoveryCount": 0,
@@ -130,7 +130,7 @@ exports[`engineering history golden reports > blocked 1`] = `
 - Repository: KevoCodo/ai-delivery-lab
 - Events: 1
 - Audit SHA-256: 1ef1c6ad9c75c2074606b8a99a2ffe20d617ae4bc92a9c89125f5c5afdec1fe4
-- State SHA-256: ea66dd8838061f27b6c8d04772a4cfc8db99394925deb552bd1fd415d5bb09f9
+- State SHA-256: e2ddb7ee7c59f396d50c6d361d1f77fdcecd1b7fd8d56526c434c4731802a431
 
 ## Workflow history
 
@@ -211,7 +211,7 @@ Data:
 
 ## State snapshot
 
-- Version: 3
+- Version: 4
 - Updated at: 2026-01-01T00:00:00.000Z
 - Discovery records: 0
 - Controller STOP active: true
@@ -258,7 +258,7 @@ exports[`engineering history golden reports > completed 1`] = `
   "version": 2,
   "input": {
     "auditSha256": "1ef1c6ad9c75c2074606b8a99a2ffe20d617ae4bc92a9c89125f5c5afdec1fe4",
-    "stateSha256": "11a01936eb3e0c8b8bab69494c28ebb35d2dcbfa550ccd17fccae09b019a8877"
+    "stateSha256": "c44c1dd1010a023d2e604befb4e91b33089c21e311ad1f5392173ceda6bb6593"
   },
   "repository": "KevoCodo/ai-delivery-lab",
   "summary": {
@@ -332,7 +332,7 @@ exports[`engineering history golden reports > completed 1`] = `
     }
   ],
   "state": {
-    "version": 3,
+    "version": 4,
     "updatedAt": "2026-01-01T00:00:00.000Z",
     "operationStatuses": {},
     "discoveryCount": 0,
@@ -380,7 +380,7 @@ exports[`engineering history golden reports > completed 1`] = `
 - Repository: KevoCodo/ai-delivery-lab
 - Events: 1
 - Audit SHA-256: 1ef1c6ad9c75c2074606b8a99a2ffe20d617ae4bc92a9c89125f5c5afdec1fe4
-- State SHA-256: 11a01936eb3e0c8b8bab69494c28ebb35d2dcbfa550ccd17fccae09b019a8877
+- State SHA-256: c44c1dd1010a023d2e604befb4e91b33089c21e311ad1f5392173ceda6bb6593
 
 ## Workflow history
 
@@ -459,7 +459,7 @@ Data:
 
 ## State snapshot
 
-- Version: 3
+- Version: 4
 - Updated at: 2026-01-01T00:00:00.000Z
 - Discovery records: 0
 - Controller STOP active: false
@@ -506,7 +506,7 @@ exports[`engineering history golden reports > duplicates 1`] = `
   "version": 2,
   "input": {
     "auditSha256": "c99959ca595c7cdd5dfc2a346512ed59d71ab4c0d3bb1b7bc3f95e0c7475a769",
-    "stateSha256": "edad80dea0f9fa67a845439ad66f7b2498946800ddf5c6602d155827e8c0319b"
+    "stateSha256": "5fb8f6afe74dcdde28ec528e916edffed71f091e5969637776c2c2e2af0045cd"
   },
   "repository": "KevoCodo/ai-delivery-lab",
   "summary": {
@@ -632,7 +632,7 @@ exports[`engineering history golden reports > duplicates 1`] = `
     }
   ],
   "state": {
-    "version": 3,
+    "version": 4,
     "updatedAt": "2026-01-01T00:00:00.000Z",
     "operationStatuses": {},
     "discoveryCount": 0,
@@ -681,7 +681,7 @@ exports[`engineering history golden reports > duplicates 1`] = `
 - Repository: KevoCodo/ai-delivery-lab
 - Events: 3
 - Audit SHA-256: c99959ca595c7cdd5dfc2a346512ed59d71ab4c0d3bb1b7bc3f95e0c7475a769
-- State SHA-256: edad80dea0f9fa67a845439ad66f7b2498946800ddf5c6602d155827e8c0319b
+- State SHA-256: 5fb8f6afe74dcdde28ec528e916edffed71f091e5969637776c2c2e2af0045cd
 
 ## Workflow history
 
@@ -820,7 +820,7 @@ Data:
 
 ## State snapshot
 
-- Version: 3
+- Version: 4
 - Updated at: 2026-01-01T00:00:00.000Z
 - Discovery records: 0
 - Controller STOP active: true
@@ -928,7 +928,7 @@ exports[`engineering history golden reports > injection 1`] = `
   "version": 2,
   "input": {
     "auditSha256": "d6dfe6d7e3c340e1ec7c15ab578b97acb2b5af35dce8490e8a0f12e3decf564d",
-    "stateSha256": "f3f0c27581ba168441cbfbd6327a8a5c876e998f4617bb3da586fb938a14b25d"
+    "stateSha256": "20cc6d3a01eb3d3e4bfdfc7b947f8db74487515125087f326ec90ea2599c7b71"
   },
   "repository": "KevoCodo/ai-delivery-lab",
   "summary": {
@@ -1013,7 +1013,7 @@ exports[`engineering history golden reports > injection 1`] = `
     }
   ],
   "state": {
-    "version": 3,
+    "version": 4,
     "updatedAt": "2026-01-01T00:00:00.000Z",
     "operationStatuses": {},
     "discoveryCount": 0,
@@ -1036,7 +1036,7 @@ exports[`engineering history golden reports > injection 1`] = `
 - Repository: KevoCodo/ai-delivery-lab
 - Events: 1
 - Audit SHA-256: d6dfe6d7e3c340e1ec7c15ab578b97acb2b5af35dce8490e8a0f12e3decf564d
-- State SHA-256: f3f0c27581ba168441cbfbd6327a8a5c876e998f4617bb3da586fb938a14b25d
+- State SHA-256: 20cc6d3a01eb3d3e4bfdfc7b947f8db74487515125087f326ec90ea2599c7b71
 
 ## Workflow history
 
@@ -1126,7 +1126,7 @@ Data:
 
 ## State snapshot
 
-- Version: 3
+- Version: 4
 - Updated at: 2026-01-01T00:00:00.000Z
 - Discovery records: 0
 - Controller STOP active: true
@@ -1170,7 +1170,7 @@ exports[`engineering history golden reports > recovered 1`] = `
   "version": 2,
   "input": {
     "auditSha256": "dfe4d1ac71ff2e8b6e30f415581dd08ae5cf69d468ccb1d5eb42e8f503424052",
-    "stateSha256": "85551e3298dc2cd0036782a534dd325d7e767700a1cee43058967816cac55250"
+    "stateSha256": "6060dfb8296ba6c83d138aca9ceec6891bcf2db79e317d64bc1de3e3d1aa783b"
   },
   "repository": "KevoCodo/ai-delivery-lab",
   "summary": {
@@ -1275,7 +1275,7 @@ exports[`engineering history golden reports > recovered 1`] = `
     }
   ],
   "state": {
-    "version": 3,
+    "version": 4,
     "updatedAt": "2026-01-01T00:00:00.000Z",
     "operationStatuses": {},
     "discoveryCount": 0,
@@ -1323,7 +1323,7 @@ exports[`engineering history golden reports > recovered 1`] = `
 - Repository: KevoCodo/ai-delivery-lab
 - Events: 2
 - Audit SHA-256: dfe4d1ac71ff2e8b6e30f415581dd08ae5cf69d468ccb1d5eb42e8f503424052
-- State SHA-256: 85551e3298dc2cd0036782a534dd325d7e767700a1cee43058967816cac55250
+- State SHA-256: 6060dfb8296ba6c83d138aca9ceec6891bcf2db79e317d64bc1de3e3d1aa783b
 
 ## Workflow history
 
@@ -1437,7 +1437,7 @@ Data:
 
 ## State snapshot
 
-- Version: 3
+- Version: 4
 - Updated at: 2026-01-01T00:00:00.000Z
 - Discovery records: 0
 - Controller STOP active: true
@@ -1484,7 +1484,7 @@ exports[`engineering history golden reports > stale 1`] = `
   "version": 2,
   "input": {
     "auditSha256": "1ef1c6ad9c75c2074606b8a99a2ffe20d617ae4bc92a9c89125f5c5afdec1fe4",
-    "stateSha256": "6d725970ebc2377a5e8c4a8754d8bfa7cf1262373fc9124d9d8aee3809804f67"
+    "stateSha256": "a7972909f554bf953d95aab33a9aa7552465f5ea7fec4dcef9d6ae6a6b86e8d7"
   },
   "repository": "KevoCodo/ai-delivery-lab",
   "summary": {
@@ -1561,7 +1561,7 @@ exports[`engineering history golden reports > stale 1`] = `
     }
   ],
   "state": {
-    "version": 3,
+    "version": 4,
     "updatedAt": "2026-01-01T00:00:00.000Z",
     "operationStatuses": {},
     "discoveryCount": 0,
@@ -1610,7 +1610,7 @@ exports[`engineering history golden reports > stale 1`] = `
 - Repository: KevoCodo/ai-delivery-lab
 - Events: 1
 - Audit SHA-256: 1ef1c6ad9c75c2074606b8a99a2ffe20d617ae4bc92a9c89125f5c5afdec1fe4
-- State SHA-256: 6d725970ebc2377a5e8c4a8754d8bfa7cf1262373fc9124d9d8aee3809804f67
+- State SHA-256: a7972909f554bf953d95aab33a9aa7552465f5ea7fec4dcef9d6ae6a6b86e8d7
 
 ## Workflow history
 
@@ -1692,7 +1692,7 @@ Data:
 
 ## State snapshot
 
-- Version: 3
+- Version: 4
 - Updated at: 2026-01-01T00:00:00.000Z
 - Discovery records: 0
 - Controller STOP active: true
@@ -1740,7 +1740,7 @@ exports[`engineering history golden reports > uncertain 1`] = `
   "version": 2,
   "input": {
     "auditSha256": "8a9612765ecd8df5e72862dbc214accc3b6ae4c3aae3023b982b08318d58d653",
-    "stateSha256": "a59c5e9ceb01d49fad5d537c8a4424746a5a365d3a81fee6d6070ff84d9c080d"
+    "stateSha256": "b39646bc6ace908baaa23f5a83ccd85b307e68914825ebb8858d280e74c37213"
   },
   "repository": "KevoCodo/ai-delivery-lab",
   "summary": {
@@ -1842,7 +1842,7 @@ exports[`engineering history golden reports > uncertain 1`] = `
     }
   ],
   "state": {
-    "version": 3,
+    "version": 4,
     "updatedAt": "2026-01-01T00:00:00.000Z",
     "operationStatuses": {
       "uncertain": 1
@@ -1894,7 +1894,7 @@ exports[`engineering history golden reports > uncertain 1`] = `
 - Repository: KevoCodo/ai-delivery-lab
 - Events: 2
 - Audit SHA-256: 8a9612765ecd8df5e72862dbc214accc3b6ae4c3aae3023b982b08318d58d653
-- State SHA-256: a59c5e9ceb01d49fad5d537c8a4424746a5a365d3a81fee6d6070ff84d9c080d
+- State SHA-256: b39646bc6ace908baaa23f5a83ccd85b307e68914825ebb8858d280e74c37213
 
 ## Workflow history
 
@@ -2005,7 +2005,7 @@ Data:
 
 ## State snapshot
 
-- Version: 3
+- Version: 4
 - Updated at: 2026-01-01T00:00:00.000Z
 - Discovery records: 0
 - Controller STOP active: true

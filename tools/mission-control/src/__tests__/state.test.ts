@@ -93,7 +93,7 @@ describe('controller state', () => {
     const current = createInitialState(defaultConfig);
     const { dispatches: _unused, ...legacy } = current;
     const migrated = parseState({ ...legacy, version: 2, schema: { createdVersion: 2 } });
-    expect(migrated.version).toBe(3);
+    expect(migrated.version).toBe(4);
     expect(migrated.schema.previousVersion).toBe(2);
     expect(migrated.dispatches).toEqual([]);
   });
@@ -120,7 +120,7 @@ describe('controller state', () => {
 
     const migrated = parseState(versionOneState);
 
-    expect(migrated.version).toBe(3);
+    expect(migrated.version).toBe(4);
     expect(migrated.schema.previousVersion).toBe(1);
     expect(migrated.operations).toEqual([]);
     expect(migrated.discoveries[0].dependencyGraph).toEqual(fixtureGraph());

@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { defaultConfig } from '../config.js';
-import { appendDiscovery, readState, writeStateAtomic } from '../state.js';
+import { appendDiscovery, createInitialState, readState, writeStateAtomic } from '../state.js';
 import { getDefaultControllerLockPath, withControllerOwnership, withStateLock } from '../locks.js';
 import {
   acquireControllerLock,
@@ -432,16 +432,7 @@ describe('recovery and idempotency foundations', () => {
 });
 
 async function readStateOrInitial(_statePath: string) {
-  return {
-    version: 2 as const,
-    schema: { createdVersion: 2 },
-    repository: defaultConfig.repository,
-    project: defaultConfig.project,
-    identities: defaultConfig.identities,
-    operations: [],
-    discoveries: [],
-    updatedAt: '2026-01-01T00:00:00.000Z'
-  };
+  return createInitialState(defaultConfig, new Date('2026-01-01T00:00:00.000Z'));
 }
 
 function createDeferred<T>() {

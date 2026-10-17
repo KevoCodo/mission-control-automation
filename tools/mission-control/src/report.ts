@@ -27,6 +27,9 @@ export interface AuditReport {
     dispatches: Array<{ dispatchId: string; operationKey: string; issueNumber: number; branch: string; localState: string;
       payloadSha256: string; correlationId: string; providerReceiptStatus: string; providerReceiptRef: string;
       evidenceProvenance: string; quarantineReason: string }>;
+    authorization?: { revocationEpoch: number; consumedGrantCount: number; grants: Array<{ grantId: string;
+      action: string; actorId: string; target: string; status: string; expiresAt: string; revoked: boolean;
+      correlationId: string; verificationProvenance: string }> };
     nativeReviews: Array<{ number: number; issueNumber: number; headSha: string; decision: string; githubApproval: string; independentReviewer: boolean; findingsComplete: boolean; threadsComplete: boolean; observedAt: string; stale: boolean; unavailable: boolean }> };
   limitations: string[];
 }
@@ -56,6 +59,8 @@ export async function generateAuditReport(auditPath: string, statePath?: string)
   if (state?.operations.some((op) => op.status === 'uncertain' || op.status === 'pending')) limitations.push('Uncertain or pending operations require provider reconciliation.');
   if (state?.dispatches.length)
     limitations.push('Dispatches remain quarantined; authoritative dispatch-ID reconciliation is unavailable.');
+  if (state?.authorization.grants.length)
+    limitations.push('Stored authorization records and claims do not prove trusted issuance or grant execution permission.');
   if (state?.pullRequestTracking.some((pr) => pr.stale || pr.unavailable) || state?.nativeReviewTracking.some((review) => review.stale || review.unavailable)) limitations.push('Stale or unavailable observations exist.');
   if (state?.pullRequestTracking.some((pr) => pr.dataSource !== 'github') || state?.nativeReviewTracking.some((review) => !review.capabilityVerified || !review.findingsComplete || !review.threadsComplete)) limitations.push('Incomplete provider evidence exists.');
   return redactSecrets({ version: 2, input: { auditSha256: hash(raw), ...(stateRaw === undefined ? {} : { stateSha256: hash(stateRaw) }) },
@@ -194,6 +199,12 @@ export function renderAuditReport(report: AuditReport, format: 'json' | 'markdow
 function project(s: ControllerState): NonNullable<AuditReport['state']> {
   return { version: s.version, updatedAt: s.updatedAt, operationStatuses: counts(s.operations.map((o) => o.status)),
     discoveryCount: s.discoveries.length, stopActive: s.nativeReviewControl.stopActive,
+    ...(s.authorization.grants.length || s.authorization.revocations.length ? { authorization: {
+      revocationEpoch: s.authorization.revocationEpoch, consumedGrantCount: s.authorization.consumedGrantIds.length,
+      grants: s.authorization.grants.map((g) => ({ grantId: safe(g.grantId), action: g.action, actorId: safe(g.actorId),
+        target: `${g.target.kind}:${g.target.number}`, status: g.status, expiresAt: g.expiresAt,
+        revoked: g.status === 'REVOKED' || s.authorization.revocations.some((r) => r.grantId === g.grantId),
+        correlationId: safe(g.correlationId), verificationProvenance: 'unverified' })) } } : {}),
     dispatches: s.dispatches.map((d) => ({ dispatchId: safe(d.dispatchId), operationKey: safe(d.operationKey),
       issueNumber: d.issueNumber, branch: safe(d.branch), localState: d.state, payloadSha256: d.payloadSha256,
       correlationId: safe(d.correlationId), providerReceiptStatus: 'unverified',

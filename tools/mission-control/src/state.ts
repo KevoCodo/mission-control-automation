@@ -14,6 +14,7 @@ import {
   type PullRequestTrackingObservation
 } from './types.js';
 import { withStateLock } from './locks.js';
+import { parseAuthorizationState } from './authorization.js';
 
 export class StateError extends Error {
   readonly code?: string;
@@ -38,6 +39,7 @@ export function createInitialState(config: ControllerConfig, now = new Date()): 
     identities: config.identities,
     operations: [],
     dispatches: [],
+    authorization: { grants: [], revocations: [], consumedGrantIds: [], revocationEpoch: 0 },
     discoveries: [],
     pullRequestTracking: [],
     nativeReviewTracking: [],
@@ -72,6 +74,10 @@ export async function writeStateAtomic(filePath: string, state: ControllerState)
 }
 
 async function writeStateAtomicUnlocked(filePath: string, state: ControllerState): Promise<void> {
+  parseAuthorizationState(state.authorization);
+  if (state.authorization.grants.some((grant) => grant.status === 'VERIFIED' || grant.issuerProvenance === 'test-fixture')) {
+    throw new StateError('Verified or fixture authorization cannot be persisted by the controller.', 'EAUTHORIZATION_UNTRUSTED');
+  }
   const directory = path.dirname(filePath);
   await mkdir(directory, { recursive: true });
   const temporaryPath = path.join(directory, `.${path.basename(filePath)}.${process.pid}.${randomUUID()}.tmp`);
@@ -243,7 +249,19 @@ export function parseState(value: unknown): ControllerState {
     return migrateVersionOneState(value);
   }
   if (value.version === 2) {
-    return parseState({ ...value, version: STATE_VERSION, dispatches: [], schema: { createdVersion: STATE_VERSION, previousVersion: 2 } });
+    return parseState({ ...value, version: 3, dispatches: [], schema: { createdVersion: STATE_VERSION, previousVersion: 2 } });
+  }
+  if (value.version === 3) {
+    if (value.authorization !== undefined) {
+      const legacyAuthorization = parseAuthorizationState(value.authorization);
+      if (legacyAuthorization.grants.length || legacyAuthorization.revocations.length ||
+        legacyAuthorization.consumedGrantIds.length || legacyAuthorization.revocationEpoch !== 0)
+        throw new StateError('Legacy state contains unexpected authorization evidence.', 'EAUTHORIZATION_STATE');
+    }
+    return parseState({ ...value, version: STATE_VERSION,
+      authorization: { grants: [], revocations: [], consumedGrantIds: [], revocationEpoch: 0 },
+      schema: { createdVersion: STATE_VERSION, previousVersion:
+        isRecord(value.schema) && typeof value.schema.previousVersion === 'number' ? value.schema.previousVersion : 3 } });
   }
   if (value.version !== STATE_VERSION) {
     throw new StateError(`Unsupported state version: ${String(value.version)}.`);
@@ -281,6 +299,7 @@ export function parseState(value: unknown): ControllerState {
     throw new StateError('State dispatches must be an array.');
   }
   validateDispatches(value.dispatches);
+  const authorization = parseAuthorizationState(value.authorization);
   if (typeof value.updatedAt !== 'string') {
     throw new StateError('State updatedAt must be a string.');
   }
@@ -305,6 +324,7 @@ export function parseState(value: unknown): ControllerState {
     },
     operations: value.operations as OperationRecord[],
     dispatches: value.dispatches as DispatchRecord[],
+    authorization,
     discoveries: value.discoveries as ControllerState['discoveries'],
     pullRequestTracking: Array.isArray(value.pullRequestTracking)
       ? (value.pullRequestTracking as PullRequestTrackingObservation[])
@@ -389,6 +409,7 @@ function migrateVersionOneState(value: Record<string, unknown>): ControllerState
     },
     operations: [],
     dispatches: [],
+    authorization: { grants: [], revocations: [], consumedGrantIds: [], revocationEpoch: 0 },
     discoveries: value.discoveries as ControllerState['discoveries'],
     pullRequestTracking: [],
     nativeReviewTracking: [],

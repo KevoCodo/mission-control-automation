@@ -11,7 +11,7 @@ import {
   recordOperationOutcome
 } from './recovery.js';
 import { withStateLock } from './locks.js';
-import { readState, writeStateAtomic } from './state.js';
+import { createInitialState, readState, writeStateAtomic } from './state.js';
 import type {
   AssignmentMode,
   ControllerConfig,
@@ -546,20 +546,7 @@ async function readStateOrInitial(statePath: string, config: ControllerConfig) {
     return await readState(statePath);
   } catch (error) {
     if (error instanceof Error && 'code' in error && (error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return {
-        version: 3 as const,
-        schema: { createdVersion: 3 },
-        repository: config.repository,
-        project: config.project,
-        identities: config.identities,
-        operations: [],
-        dispatches: [],
-        discoveries: [],
-        pullRequestTracking: [],
-        nativeReviewTracking: [],
-        nativeReviewControl: { stopActive: true, reason: 'Trusted correction authorization is unavailable.' },
-        updatedAt: new Date().toISOString()
-      };
+      return createInitialState(config);
     }
     throw error;
   }

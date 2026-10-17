@@ -178,7 +178,8 @@ function redact(value: unknown): unknown {
     return Object.fromEntries(
       Object.entries(value).map(([key, child]) => [key,
         key === 'authorization' && ['unknown', 'caller-claimed', 'verified', 'denied', 'claimed-verified; unauthenticated', 'unavailable', 'missing', 'caller-flag', 'verified-human'].includes(String(child))
-          ? child : SECRET_KEY_PATTERN.test(key) ? '[REDACTED]' : redact(child)])
+          ? child : key === 'authorization' && child !== null && typeof child === 'object'
+            ? redact(child) : SECRET_KEY_PATTERN.test(key) ? '[REDACTED]' : redact(child)])
     );
   }
   if (typeof value === 'string') {
