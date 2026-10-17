@@ -24,6 +24,9 @@ export interface AuditReport {
   history: HistoryRow[];
   state?: { version: number; updatedAt: string; operationStatuses: Record<string, number>; discoveryCount: number;
     stopActive: boolean; pullRequests: Array<{ number: number; issueNumber: number; headSha: string; generation: number; status: string; source: string; observedAt: string }>;
+    dispatches: Array<{ dispatchId: string; operationKey: string; issueNumber: number; branch: string; localState: string;
+      payloadSha256: string; correlationId: string; providerReceiptStatus: string; providerReceiptRef: string;
+      evidenceProvenance: string; quarantineReason: string }>;
     nativeReviews: Array<{ number: number; issueNumber: number; headSha: string; decision: string; githubApproval: string; independentReviewer: boolean; findingsComplete: boolean; threadsComplete: boolean; observedAt: string; stale: boolean; unavailable: boolean }> };
   limitations: string[];
 }
@@ -51,6 +54,8 @@ export async function generateAuditReport(auditPath: string, statePath?: string)
   if (new Set(ids).size !== ids.length) limitations.push('Duplicate event IDs exist; replay cannot be ruled out.');
   if (events.some((event) => event.outcome === 'uncertain' || event.outcome === 'pending')) limitations.push('Audit contains pending or uncertain outcomes.');
   if (state?.operations.some((op) => op.status === 'uncertain' || op.status === 'pending')) limitations.push('Uncertain or pending operations require provider reconciliation.');
+  if (state?.dispatches.length)
+    limitations.push('Dispatches remain quarantined; authoritative dispatch-ID reconciliation is unavailable.');
   if (state?.pullRequestTracking.some((pr) => pr.stale || pr.unavailable) || state?.nativeReviewTracking.some((review) => review.stale || review.unavailable)) limitations.push('Stale or unavailable observations exist.');
   if (state?.pullRequestTracking.some((pr) => pr.dataSource !== 'github') || state?.nativeReviewTracking.some((review) => !review.capabilityVerified || !review.findingsComplete || !review.threadsComplete)) limitations.push('Incomplete provider evidence exists.');
   return redactSecrets({ version: 2, input: { auditSha256: hash(raw), ...(stateRaw === undefined ? {} : { stateSha256: hash(stateRaw) }) },
@@ -71,6 +76,7 @@ function normalize(event: AuditEvent, index: number): EventRow {
 }
 function history(state: ControllerState | undefined, events: EventRow[]): HistoryRow[] {
   const numbers = new Set<number>([...(state?.identities.issues.map((i) => i.number) ?? []),
+    ...(state?.dispatches.map((d) => d.issueNumber) ?? []),
     ...(state?.pullRequestTracking.map((p) => p.issueNumber) ?? []),
     ...(state?.nativeReviewTracking.map((r) => r.issueNumber) ?? []),
     ...events.flatMap((e) => e.issueNumber === null ? [] : [e.issueNumber])]);
@@ -98,6 +104,8 @@ function history(state: ControllerState | undefined, events: EventRow[]): Histor
       if (review.stale || review.unavailable) blockers.push('GitHub approval observation stale or unavailable');
     }
     if (ops.some((o) => o.status === 'pending' || o.status === 'uncertain')) blockers.push('pending or uncertain operation');
+    if (state?.dispatches.some((d) => d.issueNumber === issueNumber))
+      blockers.push('dispatch quarantined; provider reconciliation blocked');
     if (state?.nativeReviewControl.stopActive) blockers.push('controller STOP active');
     blockers.push('authenticated authorization and verified provider outcome unavailable');
     const actionEvents = related.filter(isRecordedActionEvent);
@@ -170,6 +178,9 @@ export function renderAuditReport(report: AuditReport, format: 'json' | 'markdow
     `- Updated at: ${md(report.state.updatedAt)}`, `- Discovery records: ${report.state.discoveryCount}`,
     `- Controller STOP active: ${report.state.stopActive}`, `- PR observations: ${report.state.pullRequests.length}`,
     `- Native review observations: ${report.state.nativeReviews.length}`, '',
+    '### Dispatch identities', '', '| Dispatch ID | Operation key | Issue | Branch | Local state | Payload SHA-256 | Correlation ID | Receipt status | Receipt reference | Evidence provenance | Quarantine reason |',
+    '| --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- |',
+    ...report.state.dispatches.map((d) => `| ${md(d.dispatchId)} | ${md(d.operationKey)} | ${d.issueNumber} | ${md(d.branch)} | ${md(d.localState)} | ${md(d.payloadSha256)} | ${md(d.correlationId)} | ${md(d.providerReceiptStatus)} | ${md(d.providerReceiptRef)} | ${md(d.evidenceProvenance)} | ${md(d.quarantineReason)} |`), '',
     '### Operation statuses', '', '| Status | Count |', '| --- | ---: |',
     ...Object.entries(report.state.operationStatuses).map(([k, v]) => `| ${md(k)} | ${v} |`), '',
     '### PR observations', '', '| PR | Issue | Head | Generation | Status | Source | Observed at |', '| ---: | ---: | --- | ---: | --- | --- | --- |',
@@ -183,6 +194,11 @@ export function renderAuditReport(report: AuditReport, format: 'json' | 'markdow
 function project(s: ControllerState): NonNullable<AuditReport['state']> {
   return { version: s.version, updatedAt: s.updatedAt, operationStatuses: counts(s.operations.map((o) => o.status)),
     discoveryCount: s.discoveries.length, stopActive: s.nativeReviewControl.stopActive,
+    dispatches: s.dispatches.map((d) => ({ dispatchId: safe(d.dispatchId), operationKey: safe(d.operationKey),
+      issueNumber: d.issueNumber, branch: safe(d.branch), localState: d.state, payloadSha256: d.payloadSha256,
+      correlationId: safe(d.correlationId), providerReceiptStatus: 'unverified',
+      providerReceiptRef: safe(d.providerReceiptRef), evidenceProvenance: safe(d.evidence?.provenance),
+      quarantineReason: safe(d.quarantineReason) })),
     pullRequests: s.pullRequestTracking.map((p) => ({ number: p.pullRequestNumber, issueNumber: p.issueNumber,
       headSha: safe(p.headSha), generation: p.generation, status: safe(p.status), source: safe(p.dataSource), observedAt: safe(p.observedAt) })),
     nativeReviews: s.nativeReviewTracking.map((r) => ({ number: r.pullRequestNumber, issueNumber: r.issueNumber,

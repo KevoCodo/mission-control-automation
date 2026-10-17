@@ -7,6 +7,7 @@ import {
   type ControllerConfig,
   type ControllerState,
   type DiscoveryResult,
+  type DispatchRecord,
   type IdentityMap,
   type NativeReviewObservation,
   type OperationRecord,
@@ -36,6 +37,7 @@ export function createInitialState(config: ControllerConfig, now = new Date()): 
     project: config.project,
     identities: config.identities,
     operations: [],
+    dispatches: [],
     discoveries: [],
     pullRequestTracking: [],
     nativeReviewTracking: [],
@@ -240,6 +242,9 @@ export function parseState(value: unknown): ControllerState {
   if (value.version === MIN_SUPPORTED_STATE_VERSION) {
     return migrateVersionOneState(value);
   }
+  if (value.version === 2) {
+    return parseState({ ...value, version: STATE_VERSION, dispatches: [], schema: { createdVersion: STATE_VERSION, previousVersion: 2 } });
+  }
   if (value.version !== STATE_VERSION) {
     throw new StateError(`Unsupported state version: ${String(value.version)}.`);
   }
@@ -272,6 +277,10 @@ export function parseState(value: unknown): ControllerState {
   if (!Array.isArray(value.operations)) {
     throw new StateError('State operations must be an array.');
   }
+  if (!Array.isArray(value.dispatches)) {
+    throw new StateError('State dispatches must be an array.');
+  }
+  validateDispatches(value.dispatches);
   if (typeof value.updatedAt !== 'string') {
     throw new StateError('State updatedAt must be a string.');
   }
@@ -295,6 +304,7 @@ export function parseState(value: unknown): ControllerState {
       pullRequests: value.identities.pullRequests as IdentityMap['pullRequests']
     },
     operations: value.operations as OperationRecord[],
+    dispatches: value.dispatches as DispatchRecord[],
     discoveries: value.discoveries as ControllerState['discoveries'],
     pullRequestTracking: Array.isArray(value.pullRequestTracking)
       ? (value.pullRequestTracking as PullRequestTrackingObservation[])
@@ -378,6 +388,7 @@ function migrateVersionOneState(value: Record<string, unknown>): ControllerState
       pullRequests: value.identities.pullRequests as IdentityMap['pullRequests']
     },
     operations: [],
+    dispatches: [],
     discoveries: value.discoveries as ControllerState['discoveries'],
     pullRequestTracking: [],
     nativeReviewTracking: [],
@@ -388,6 +399,44 @@ function migrateVersionOneState(value: Record<string, unknown>): ControllerState
 
 function formatTimestamp(now: Date): string {
   return now.toISOString().replace(/[:.]/g, '-');
+}
+
+function validateDispatches(value: unknown[]): void {
+  const ids = new Set<string>();
+  const keys = new Set<string>();
+  const activeIssues = new Set<number>();
+  const activeBranches = new Set<string>();
+  for (const item of value) {
+    if (!isRecord(item) || item.version !== 1 || typeof item.dispatchId !== 'string' ||
+      typeof item.operationKey !== 'string' || typeof item.payloadSha256 !== 'string' ||
+      !/^[a-f0-9]{64}$/.test(item.payloadSha256) || typeof item.correlationId !== 'string' ||
+      !isRecord(item.repository) || typeof item.repository.owner !== 'string' || typeof item.repository.name !== 'string' ||
+      !Number.isInteger(item.issueNumber) || Number(item.issueNumber) <= 0 || typeof item.branch !== 'string' ||
+      typeof item.createdAt !== 'string' || typeof item.updatedAt !== 'string' ||
+      !['INTENT_RECORDED', 'SUBMITTING', 'ACCEPTED', 'REJECTED', 'UNCERTAIN', 'RETIRED', 'COMPLETED'].includes(String(item.state)) ||
+      ids.has(item.dispatchId) || keys.has(item.operationKey) ||
+      (item.providerReceiptRef !== undefined && typeof item.providerReceiptRef !== 'string') ||
+      (item.evidence !== undefined && (!isRecord(item.evidence) || item.evidence.provenance !== 'fixture' ||
+        item.evidence.verified !== true || item.evidence.dispatchId !== item.dispatchId ||
+        typeof item.evidence.providerReceiptRef !== 'string' ||
+        !['acceptance', 'rejection', 'retirement', 'outcome'].includes(String(item.evidence.kind)))) ||
+      (item.providerReceiptRef !== undefined) ||
+      (['ACCEPTED', 'REJECTED', 'RETIRED', 'COMPLETED'].includes(String(item.state)) && item.evidence === undefined) ||
+      (item.state === 'ACCEPTED' && (!isRecord(item.evidence) || item.evidence.kind !== 'acceptance')) ||
+      (item.state === 'REJECTED' && (!isRecord(item.evidence) || item.evidence.kind !== 'rejection')) ||
+      (item.state === 'COMPLETED' && (!isRecord(item.evidence) || item.evidence.kind !== 'outcome')) ||
+      (item.state === 'RETIRED' && (!isRecord(item.evidence) || item.evidence.kind !== 'retirement' || item.evidence.durable !== true))) {
+      throw new StateError('State dispatch identity is invalid or duplicated.', 'EDISPATCH_STATE');
+    }
+    if (!['REJECTED', 'RETIRED', 'COMPLETED'].includes(String(item.state))) {
+      if (activeIssues.has(item.issueNumber as number) || activeBranches.has(item.branch as string))
+        throw new StateError('State has conflicting active dispatch identities.', 'EDISPATCH_STATE');
+      activeIssues.add(item.issueNumber as number);
+      activeBranches.add(item.branch as string);
+    }
+    ids.add(item.dispatchId);
+    keys.add(item.operationKey);
+  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

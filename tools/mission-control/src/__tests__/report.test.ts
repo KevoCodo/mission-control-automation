@@ -92,7 +92,7 @@ describe('audit reporting', () => {
     await writeFile(statePath, JSON.stringify(state));
     const report = await generateAuditReport(auditPath, statePath);
     expect(report.repository).toBe('KevoCodo/ai-delivery-lab');
-    expect(report.state).toMatchObject({ version: 2, discoveryCount: 0, stopActive: true });
+    expect(report.state).toMatchObject({ version: 3, discoveryCount: 0, stopActive: true });
     expect(report.input.stateSha256).toMatch(/^[a-f0-9]{64}$/);
     expect(renderAuditReport(report, 'markdown')).toContain('### PR observations');
   });

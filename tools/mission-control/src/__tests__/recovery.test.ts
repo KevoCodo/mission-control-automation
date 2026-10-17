@@ -221,6 +221,30 @@ describe('recovery and idempotency foundations', () => {
     expect((await readState(statePath)).operations[0].status).toBe('pending');
   });
 
+  it('reports pending and uncertain AO operations while reconciling only non-AO work', async () => {
+    const statePath = path.join(tempDirectory, 'mixed-state.json');
+    const pendingAo = { key: 'legacy-ao-pending', action: 'ao-spawn-worker', targetType: 'issue', targetId: 7 };
+    const uncertainAo = { key: 'legacy-ao-uncertain', action: 'ao-spawn-worker', targetType: 'issue', targetId: 8 };
+    const github = { key: 'github-pr', action: 'create-pr', targetType: 'pullRequest', targetId: 14 };
+    await recordOperationIntent(statePath, defaultConfig, pendingAo);
+    await recordOperationIntent(statePath, defaultConfig, uncertainAo);
+    await recordOperationOutcome(statePath, uncertainAo.key, 'uncertain', undefined);
+    await recordOperationIntent(statePath, defaultConfig, github);
+    const before = await readState(statePath);
+    const probed: string[] = [];
+    const result = await reconcilePendingOperations(statePath, async (operation) => {
+      probed.push(operation.intent.key);
+      return { status: 'succeeded', outcome: { provider: 'github', externalId: 14 } };
+    });
+    expect(probed).toEqual([github.key]);
+    expect(result.recovered).toMatchObject([{ intent: { key: github.key }, status: 'succeeded' }]);
+    expect(result.blocked).toMatchObject([
+      { intent: { key: pendingAo.key }, status: 'pending' },
+      { intent: { key: uncertainAo.key }, status: 'uncertain' }
+    ]);
+    expect((await readState(statePath)).operations.slice(0, 2)).toEqual(before.operations.slice(0, 2));
+  });
+
   it('deduplicates replayed intents by stable operation key', async () => {
     const statePath = path.join(tempDirectory, 'state.json');
     const firstKey = createOperationKey({

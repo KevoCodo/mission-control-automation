@@ -89,6 +89,15 @@ describe('controller state', () => {
     expect(() => parseState({ ...createInitialState(defaultConfig), version: 999 })).toThrow(/Unsupported/);
   });
 
+  it('migrates version two state without inventing dispatch receipts', () => {
+    const current = createInitialState(defaultConfig);
+    const { dispatches: _unused, ...legacy } = current;
+    const migrated = parseState({ ...legacy, version: 2, schema: { createdVersion: 2 } });
+    expect(migrated.version).toBe(3);
+    expect(migrated.schema.previousVersion).toBe(2);
+    expect(migrated.dispatches).toEqual([]);
+  });
+
   it('migrates version one state with recovery fields and graph discoveries preserved', () => {
     const versionOneState = {
       version: 1,
@@ -111,7 +120,7 @@ describe('controller state', () => {
 
     const migrated = parseState(versionOneState);
 
-    expect(migrated.version).toBe(2);
+    expect(migrated.version).toBe(3);
     expect(migrated.schema.previousVersion).toBe(1);
     expect(migrated.operations).toEqual([]);
     expect(migrated.discoveries[0].dependencyGraph).toEqual(fixtureGraph());

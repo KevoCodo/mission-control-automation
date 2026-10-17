@@ -6,7 +6,7 @@ exports[`engineering history golden reports > blocked 1`] = `
   "version": 2,
   "input": {
     "auditSha256": "1ef1c6ad9c75c2074606b8a99a2ffe20d617ae4bc92a9c89125f5c5afdec1fe4",
-    "stateSha256": "1926a59819eb56cc294b033207645e979493048f4b4ac682a39c3b72c4245bde"
+    "stateSha256": "ea66dd8838061f27b6c8d04772a4cfc8db99394925deb552bd1fd415d5bb09f9"
   },
   "repository": "KevoCodo/ai-delivery-lab",
   "summary": {
@@ -82,11 +82,12 @@ exports[`engineering history golden reports > blocked 1`] = `
     }
   ],
   "state": {
-    "version": 2,
+    "version": 3,
     "updatedAt": "2026-01-01T00:00:00.000Z",
     "operationStatuses": {},
     "discoveryCount": 0,
     "stopActive": true,
+    "dispatches": [],
     "pullRequests": [
       {
         "number": 14,
@@ -129,7 +130,7 @@ exports[`engineering history golden reports > blocked 1`] = `
 - Repository: KevoCodo/ai-delivery-lab
 - Events: 1
 - Audit SHA-256: 1ef1c6ad9c75c2074606b8a99a2ffe20d617ae4bc92a9c89125f5c5afdec1fe4
-- State SHA-256: 1926a59819eb56cc294b033207645e979493048f4b4ac682a39c3b72c4245bde
+- State SHA-256: ea66dd8838061f27b6c8d04772a4cfc8db99394925deb552bd1fd415d5bb09f9
 
 ## Workflow history
 
@@ -210,12 +211,17 @@ Data:
 
 ## State snapshot
 
-- Version: 2
+- Version: 3
 - Updated at: 2026-01-01T00:00:00.000Z
 - Discovery records: 0
 - Controller STOP active: true
 - PR observations: 1
 - Native review observations: 1
+
+### Dispatch identities
+
+| Dispatch ID | Operation key | Issue | Branch | Local state | Payload SHA-256 | Correlation ID | Receipt status | Receipt reference | Evidence provenance | Quarantine reason |
+| --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- |
 
 ### Operation statuses
 
@@ -252,7 +258,7 @@ exports[`engineering history golden reports > completed 1`] = `
   "version": 2,
   "input": {
     "auditSha256": "1ef1c6ad9c75c2074606b8a99a2ffe20d617ae4bc92a9c89125f5c5afdec1fe4",
-    "stateSha256": "1a27e74f8d475706f5d69dd6505d192e254159e3729ae0b17babddc0c2688d95"
+    "stateSha256": "11a01936eb3e0c8b8bab69494c28ebb35d2dcbfa550ccd17fccae09b019a8877"
   },
   "repository": "KevoCodo/ai-delivery-lab",
   "summary": {
@@ -326,11 +332,12 @@ exports[`engineering history golden reports > completed 1`] = `
     }
   ],
   "state": {
-    "version": 2,
+    "version": 3,
     "updatedAt": "2026-01-01T00:00:00.000Z",
     "operationStatuses": {},
     "discoveryCount": 0,
     "stopActive": false,
+    "dispatches": [],
     "pullRequests": [
       {
         "number": 14,
@@ -373,7 +380,7 @@ exports[`engineering history golden reports > completed 1`] = `
 - Repository: KevoCodo/ai-delivery-lab
 - Events: 1
 - Audit SHA-256: 1ef1c6ad9c75c2074606b8a99a2ffe20d617ae4bc92a9c89125f5c5afdec1fe4
-- State SHA-256: 1a27e74f8d475706f5d69dd6505d192e254159e3729ae0b17babddc0c2688d95
+- State SHA-256: 11a01936eb3e0c8b8bab69494c28ebb35d2dcbfa550ccd17fccae09b019a8877
 
 ## Workflow history
 
@@ -452,12 +459,17 @@ Data:
 
 ## State snapshot
 
-- Version: 2
+- Version: 3
 - Updated at: 2026-01-01T00:00:00.000Z
 - Discovery records: 0
 - Controller STOP active: false
 - PR observations: 1
 - Native review observations: 1
+
+### Dispatch identities
+
+| Dispatch ID | Operation key | Issue | Branch | Local state | Payload SHA-256 | Correlation ID | Receipt status | Receipt reference | Evidence provenance | Quarantine reason |
+| --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- |
 
 ### Operation statuses
 
@@ -494,7 +506,7 @@ exports[`engineering history golden reports > duplicates 1`] = `
   "version": 2,
   "input": {
     "auditSha256": "c99959ca595c7cdd5dfc2a346512ed59d71ab4c0d3bb1b7bc3f95e0c7475a769",
-    "stateSha256": "90635f177945d631eca7d5922426cbfb3fa4e1bc1056de9d03f0fea57b5b8ae7"
+    "stateSha256": "edad80dea0f9fa67a845439ad66f7b2498946800ddf5c6602d155827e8c0319b"
   },
   "repository": "KevoCodo/ai-delivery-lab",
   "summary": {
@@ -620,11 +632,12 @@ exports[`engineering history golden reports > duplicates 1`] = `
     }
   ],
   "state": {
-    "version": 2,
+    "version": 3,
     "updatedAt": "2026-01-01T00:00:00.000Z",
     "operationStatuses": {},
     "discoveryCount": 0,
     "stopActive": true,
+    "dispatches": [],
     "pullRequests": [
       {
         "number": 14,
@@ -668,7 +681,7 @@ exports[`engineering history golden reports > duplicates 1`] = `
 - Repository: KevoCodo/ai-delivery-lab
 - Events: 3
 - Audit SHA-256: c99959ca595c7cdd5dfc2a346512ed59d71ab4c0d3bb1b7bc3f95e0c7475a769
-- State SHA-256: 90635f177945d631eca7d5922426cbfb3fa4e1bc1056de9d03f0fea57b5b8ae7
+- State SHA-256: edad80dea0f9fa67a845439ad66f7b2498946800ddf5c6602d155827e8c0319b
 
 ## Workflow history
 
@@ -807,12 +820,17 @@ Data:
 
 ## State snapshot
 
-- Version: 2
+- Version: 3
 - Updated at: 2026-01-01T00:00:00.000Z
 - Discovery records: 0
 - Controller STOP active: true
 - PR observations: 1
 - Native review observations: 1
+
+### Dispatch identities
+
+| Dispatch ID | Operation key | Issue | Branch | Local state | Payload SHA-256 | Correlation ID | Receipt status | Receipt reference | Evidence provenance | Quarantine reason |
+| --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- |
 
 ### Operation statuses
 
@@ -910,7 +928,7 @@ exports[`engineering history golden reports > injection 1`] = `
   "version": 2,
   "input": {
     "auditSha256": "d6dfe6d7e3c340e1ec7c15ab578b97acb2b5af35dce8490e8a0f12e3decf564d",
-    "stateSha256": "e866b94e4bddc5f4bf3eb4c980e89ada6174ef6c5ba447b8fbc569a80e8cc7f1"
+    "stateSha256": "f3f0c27581ba168441cbfbd6327a8a5c876e998f4617bb3da586fb938a14b25d"
   },
   "repository": "KevoCodo/ai-delivery-lab",
   "summary": {
@@ -995,11 +1013,12 @@ exports[`engineering history golden reports > injection 1`] = `
     }
   ],
   "state": {
-    "version": 2,
+    "version": 3,
     "updatedAt": "2026-01-01T00:00:00.000Z",
     "operationStatuses": {},
     "discoveryCount": 0,
     "stopActive": true,
+    "dispatches": [],
     "pullRequests": [],
     "nativeReviews": []
   },
@@ -1017,7 +1036,7 @@ exports[`engineering history golden reports > injection 1`] = `
 - Repository: KevoCodo/ai-delivery-lab
 - Events: 1
 - Audit SHA-256: d6dfe6d7e3c340e1ec7c15ab578b97acb2b5af35dce8490e8a0f12e3decf564d
-- State SHA-256: e866b94e4bddc5f4bf3eb4c980e89ada6174ef6c5ba447b8fbc569a80e8cc7f1
+- State SHA-256: f3f0c27581ba168441cbfbd6327a8a5c876e998f4617bb3da586fb938a14b25d
 
 ## Workflow history
 
@@ -1107,12 +1126,17 @@ Data:
 
 ## State snapshot
 
-- Version: 2
+- Version: 3
 - Updated at: 2026-01-01T00:00:00.000Z
 - Discovery records: 0
 - Controller STOP active: true
 - PR observations: 0
 - Native review observations: 0
+
+### Dispatch identities
+
+| Dispatch ID | Operation key | Issue | Branch | Local state | Payload SHA-256 | Correlation ID | Receipt status | Receipt reference | Evidence provenance | Quarantine reason |
+| --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- |
 
 ### Operation statuses
 
@@ -1146,7 +1170,7 @@ exports[`engineering history golden reports > recovered 1`] = `
   "version": 2,
   "input": {
     "auditSha256": "dfe4d1ac71ff2e8b6e30f415581dd08ae5cf69d468ccb1d5eb42e8f503424052",
-    "stateSha256": "3c54dea63a8e1c41cb6a08d881b4257bce09fa4aa7b509d7629b3eef2eeb138e"
+    "stateSha256": "85551e3298dc2cd0036782a534dd325d7e767700a1cee43058967816cac55250"
   },
   "repository": "KevoCodo/ai-delivery-lab",
   "summary": {
@@ -1251,11 +1275,12 @@ exports[`engineering history golden reports > recovered 1`] = `
     }
   ],
   "state": {
-    "version": 2,
+    "version": 3,
     "updatedAt": "2026-01-01T00:00:00.000Z",
     "operationStatuses": {},
     "discoveryCount": 0,
     "stopActive": true,
+    "dispatches": [],
     "pullRequests": [
       {
         "number": 14,
@@ -1298,7 +1323,7 @@ exports[`engineering history golden reports > recovered 1`] = `
 - Repository: KevoCodo/ai-delivery-lab
 - Events: 2
 - Audit SHA-256: dfe4d1ac71ff2e8b6e30f415581dd08ae5cf69d468ccb1d5eb42e8f503424052
-- State SHA-256: 3c54dea63a8e1c41cb6a08d881b4257bce09fa4aa7b509d7629b3eef2eeb138e
+- State SHA-256: 85551e3298dc2cd0036782a534dd325d7e767700a1cee43058967816cac55250
 
 ## Workflow history
 
@@ -1412,12 +1437,17 @@ Data:
 
 ## State snapshot
 
-- Version: 2
+- Version: 3
 - Updated at: 2026-01-01T00:00:00.000Z
 - Discovery records: 0
 - Controller STOP active: true
 - PR observations: 1
 - Native review observations: 1
+
+### Dispatch identities
+
+| Dispatch ID | Operation key | Issue | Branch | Local state | Payload SHA-256 | Correlation ID | Receipt status | Receipt reference | Evidence provenance | Quarantine reason |
+| --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- |
 
 ### Operation statuses
 
@@ -1454,7 +1484,7 @@ exports[`engineering history golden reports > stale 1`] = `
   "version": 2,
   "input": {
     "auditSha256": "1ef1c6ad9c75c2074606b8a99a2ffe20d617ae4bc92a9c89125f5c5afdec1fe4",
-    "stateSha256": "dbf173862ee63311881db9c83bed721422f60e7bc0229cb5983cf48494eeed2c"
+    "stateSha256": "6d725970ebc2377a5e8c4a8754d8bfa7cf1262373fc9124d9d8aee3809804f67"
   },
   "repository": "KevoCodo/ai-delivery-lab",
   "summary": {
@@ -1531,11 +1561,12 @@ exports[`engineering history golden reports > stale 1`] = `
     }
   ],
   "state": {
-    "version": 2,
+    "version": 3,
     "updatedAt": "2026-01-01T00:00:00.000Z",
     "operationStatuses": {},
     "discoveryCount": 0,
     "stopActive": true,
+    "dispatches": [],
     "pullRequests": [
       {
         "number": 14,
@@ -1579,7 +1610,7 @@ exports[`engineering history golden reports > stale 1`] = `
 - Repository: KevoCodo/ai-delivery-lab
 - Events: 1
 - Audit SHA-256: 1ef1c6ad9c75c2074606b8a99a2ffe20d617ae4bc92a9c89125f5c5afdec1fe4
-- State SHA-256: dbf173862ee63311881db9c83bed721422f60e7bc0229cb5983cf48494eeed2c
+- State SHA-256: 6d725970ebc2377a5e8c4a8754d8bfa7cf1262373fc9124d9d8aee3809804f67
 
 ## Workflow history
 
@@ -1661,12 +1692,17 @@ Data:
 
 ## State snapshot
 
-- Version: 2
+- Version: 3
 - Updated at: 2026-01-01T00:00:00.000Z
 - Discovery records: 0
 - Controller STOP active: true
 - PR observations: 1
 - Native review observations: 1
+
+### Dispatch identities
+
+| Dispatch ID | Operation key | Issue | Branch | Local state | Payload SHA-256 | Correlation ID | Receipt status | Receipt reference | Evidence provenance | Quarantine reason |
+| --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- |
 
 ### Operation statuses
 
@@ -1704,7 +1740,7 @@ exports[`engineering history golden reports > uncertain 1`] = `
   "version": 2,
   "input": {
     "auditSha256": "8a9612765ecd8df5e72862dbc214accc3b6ae4c3aae3023b982b08318d58d653",
-    "stateSha256": "992461aea18d3260f3baeef539d4a161abc3e3b5a5fa229dfc0873430aa539b7"
+    "stateSha256": "a59c5e9ceb01d49fad5d537c8a4424746a5a365d3a81fee6d6070ff84d9c080d"
   },
   "repository": "KevoCodo/ai-delivery-lab",
   "summary": {
@@ -1806,13 +1842,14 @@ exports[`engineering history golden reports > uncertain 1`] = `
     }
   ],
   "state": {
-    "version": 2,
+    "version": 3,
     "updatedAt": "2026-01-01T00:00:00.000Z",
     "operationStatuses": {
       "uncertain": 1
     },
     "discoveryCount": 0,
     "stopActive": true,
+    "dispatches": [],
     "pullRequests": [
       {
         "number": 14,
@@ -1857,7 +1894,7 @@ exports[`engineering history golden reports > uncertain 1`] = `
 - Repository: KevoCodo/ai-delivery-lab
 - Events: 2
 - Audit SHA-256: 8a9612765ecd8df5e72862dbc214accc3b6ae4c3aae3023b982b08318d58d653
-- State SHA-256: 992461aea18d3260f3baeef539d4a161abc3e3b5a5fa229dfc0873430aa539b7
+- State SHA-256: a59c5e9ceb01d49fad5d537c8a4424746a5a365d3a81fee6d6070ff84d9c080d
 
 ## Workflow history
 
@@ -1968,12 +2005,17 @@ Data:
 
 ## State snapshot
 
-- Version: 2
+- Version: 3
 - Updated at: 2026-01-01T00:00:00.000Z
 - Discovery records: 0
 - Controller STOP active: true
 - PR observations: 1
 - Native review observations: 1
+
+### Dispatch identities
+
+| Dispatch ID | Operation key | Issue | Branch | Local state | Payload SHA-256 | Correlation ID | Receipt status | Receipt reference | Evidence provenance | Quarantine reason |
+| --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- |
 
 ### Operation statuses
 

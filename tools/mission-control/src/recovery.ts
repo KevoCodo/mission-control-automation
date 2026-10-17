@@ -28,6 +28,7 @@ export interface ReconciliationResult {
   recovered: OperationRecord[];
   stillPending: OperationRecord[];
   failed: OperationRecord[];
+  blocked: OperationRecord[];
 }
 
 interface ProbedOperation {
@@ -96,6 +97,9 @@ export async function recordOperationOutcome(
     }
 
     const previous = state.operations[index];
+    if (previous.intent.action === 'ao-spawn-worker' && status !== 'uncertain') {
+      throw new RecoveryError('AO spawn outcome requires unavailable dispatch-ID provider evidence.', 'EAO_RECONCILIATION_BLOCKED');
+    }
     const nextRecord: OperationRecord = {
       ...previous,
       status,
@@ -147,7 +151,8 @@ export async function reconcilePendingOperations(
 ): Promise<ReconciliationResult> {
   const candidates = await withOperationStateLock(filePath, 'operation-reconcile-snapshot', async () => {
     const state = await readState(filePath);
-    return state.operations.filter((operation) => operation.status === 'pending' || operation.status === 'uncertain');
+    return state.operations.filter((operation) => operation.intent.action !== 'ao-spawn-worker' &&
+      (operation.status === 'pending' || operation.status === 'uncertain'));
   });
 
   const probed = await probeWithoutStateLock(candidates, probe);
@@ -158,6 +163,8 @@ export async function reconcilePendingOperations(
     const recovered: OperationRecord[] = [];
     const stillPending: OperationRecord[] = [];
     const failed: OperationRecord[] = [];
+    const blocked = operations.filter((operation) => operation.intent.action === 'ao-spawn-worker' &&
+      (operation.status === 'pending' || operation.status === 'uncertain'));
 
     for (const { operation, truth } of probed) {
       const index = operations.findIndex((current) => current.intent.key === operation.intent.key);
@@ -187,8 +194,8 @@ export async function reconcilePendingOperations(
       }
     }
 
-    await writeStateAtomic(filePath, { ...state, operations, updatedAt: now.toISOString() });
-    return { recovered, stillPending, failed };
+    if (probed.length) await writeStateAtomic(filePath, { ...state, operations, updatedAt: now.toISOString() });
+    return { recovered, stillPending, failed, blocked };
   });
 }
 

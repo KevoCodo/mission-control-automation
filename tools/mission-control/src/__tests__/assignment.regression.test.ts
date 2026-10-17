@@ -168,39 +168,34 @@ describe('AO session assignment adapter (baseline regression)', () => {
     });
   });
 
-  it('reconciles uncertain spawn responses from AO session truth', async () => {
+  it('blocks uncertain reconciliation despite an issue-matched session', async () => {
     const cfg = config();
     await writeStateAtomic(statePath(), {
       ...createInitialState(cfg),
       operations: [durableSpawnIntent({ issueNumber: 7, branch: 'ao/issue-7-ao-spawn-planner', status: 'uncertain' })]
     });
 
-    const result = await reconcileAoSpawnIntents(
+    await expect(reconcileAoSpawnIntents(
       statePath(),
       clientsWith({ sessions: [{ id: 'session-7', branch: 'ao/issue-7-ao-spawn-planner', worktreePath, issueNumber: 7 }] })
-    );
+    )).rejects.toMatchObject({ code: 'EAO_RECONCILIATION_BLOCKED' });
 
-    expect(result.recovered).toHaveLength(1);
-    expect((await readState(statePath())).operations[0]).toMatchObject({ status: 'succeeded' });
+    expect((await readState(statePath())).operations[0]).toMatchObject({ status: 'uncertain' });
   });
 
-  it('reconciles uncertain spawn responses from branch-only AO session truth', async () => {
+  it('blocks uncertain reconciliation despite a branch-matched session', async () => {
     const cfg = config();
     await writeStateAtomic(statePath(), {
       ...createInitialState(cfg),
       operations: [durableSpawnIntent({ issueNumber: 7, branch: 'ao/issue-7-ao-spawn-planner', status: 'uncertain' })]
     });
 
-    const result = await reconcileAoSpawnIntents(
+    await expect(reconcileAoSpawnIntents(
       statePath(),
       clientsWith({ sessions: [{ id: 'session-7', branch: 'ao/issue-7-ao-spawn-planner', worktreePath }] })
-    );
+    )).rejects.toMatchObject({ code: 'EAO_RECONCILIATION_BLOCKED' });
 
-    expect(result.recovered).toHaveLength(1);
-    expect((await readState(statePath())).operations[0]).toMatchObject({
-      status: 'succeeded',
-      outcome: { externalId: 'session-7' }
-    });
+    expect((await readState(statePath())).operations[0]).toMatchObject({ status: 'uncertain' });
   });
 
   it.skip('does not retry an interrupted uncertain spawn intent', async () => {

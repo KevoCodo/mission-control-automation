@@ -8,7 +8,6 @@ import type { AoCapabilityReport, ControllerClients } from './clients.js';
 import {
   createOperationKey,
   markOperationAttempt,
-  reconcilePendingOperations,
   recordOperationOutcome
 } from './recovery.js';
 import { withStateLock } from './locks.js';
@@ -264,38 +263,9 @@ export async function reconcileAoSpawnIntents(
   clients: ControllerClients,
   now = new Date()
 ) {
-  assertTrustedAoAdapter(clients.ao.adapterName);
-  if (!clients.ao.listSessions) {
-    throw new AssignmentError('Trusted AO adapter does not expose an allowlisted session listing call.', 'EAO_SESSION');
-  }
-
-  return reconcilePendingOperations(
-    statePath,
-    async (record) => {
-      if (record.intent.action !== 'ao-spawn-worker') {
-        return { status: 'pending' };
-      }
-      const payload = isRecord(record.intent.payload) ? record.intent.payload : {};
-      const issueNumber = typeof record.intent.targetId === 'number' ? record.intent.targetId : Number(record.intent.targetId);
-      const branch = typeof payload.branch === 'string' ? payload.branch : undefined;
-      const sessionsByIssue = await clients.ao.listSessions?.({ issueNumber });
-      const sessionsByBranch = branch ? await clients.ao.listSessions?.({ branch }) : [];
-      const sessions = [...(sessionsByIssue ?? []), ...(sessionsByBranch ?? [])];
-      const match = sessions?.find((session) => session.issueNumber === issueNumber || session.branch === branch);
-      if (!match) {
-        return { status: 'pending' };
-      }
-      return {
-        status: 'succeeded',
-        outcome: {
-          provider: 'ao',
-          externalId: match.id,
-          data: match
-        }
-      };
-    },
-    now
-  );
+  // Session identity is never authoritative delivery evidence. B2 has no AO receipt lookup.
+  void statePath; void clients; void now;
+  throw new AssignmentError('Authoritative AO dispatch-ID reconciliation is unavailable.', 'EAO_RECONCILIATION_BLOCKED');
 }
 
 export async function validateAssignmentWorktree(
@@ -577,12 +547,13 @@ async function readStateOrInitial(statePath: string, config: ControllerConfig) {
   } catch (error) {
     if (error instanceof Error && 'code' in error && (error as NodeJS.ErrnoException).code === 'ENOENT') {
       return {
-        version: 2 as const,
-        schema: { createdVersion: 2 },
+        version: 3 as const,
+        schema: { createdVersion: 3 },
         repository: config.repository,
         project: config.project,
         identities: config.identities,
         operations: [],
+        dispatches: [],
         discoveries: [],
         pullRequestTracking: [],
         nativeReviewTracking: [],

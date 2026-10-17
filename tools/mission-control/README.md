@@ -9,6 +9,18 @@ and must not mutate GitHub, AO, branches, issues, sessions, or deployments.
 
 The exported AO assignment function denies every live request before calling an AO client, including injected clients. It records a controller-local `assignment.dispatch.denied` audit outcome and throws `EAO_EXECUTION_BOUNDARY_UNAVAILABLE`; it creates no spawn intent or session identity. Dry-run previews remain available. The bundled CLI does not invoke live spawning, and the merge adapter is disabled. A plan, pending intent, CI result, or review verdict does not grant permission for a side effect.
 
+## B2 dispatch identity
+
+Correction: lifecycle fixture transitions now live only in a pure evaluator under `src/__tests__`; production exports cannot persist fixture-based provider outcomes. `quarantineDispatch` can mark a local intent or interrupted attempt `UNCERTAIN` without asserting a provider result. Existing records with fixture evidence remain readable, explicitly unverified, and quarantined. A terminal fixture state cannot free its issue or branch for another dispatch intent. Generic reconciliation returns unresolved legacy AO operations in `blocked` without probing or changing them, while preserving non-AO reconciliation.
+
+Dispatch fingerprints use SHA-256 of recursively canonical JSON with sorted object keys. JSON primitives and dense arrays are accepted. Cycles, undefined, functions, symbols, bigint, non-finite numbers, sparse arrays, accessors, symbol or non-enumerable keys, and non-plain object prototypes raise `EDISPATCH_PAYLOAD`. Payload contents are never persisted or logged.
+
+State schema v3 adds `dispatches` with record version 1. `recordDispatchIntent` records a UUID dispatch ID, stable operation key, repository/issue/branch target, optional intended target/session ID, SHA-256 of canonical JSON payload, correlation ID, timestamps, local lifecycle state, and evidence metadata. It stores no payload or private instructions. The same key and payload returns the prior identity; a changed payload or target conflicts. A second active identity for the same issue or branch is blocked under the controller ownership lock. An intent is a local record and never an AO receipt or execution permission.
+
+The lifecycle model covers `INTENT_RECORDED`, `SUBMITTING`, `ACCEPTED`, `REJECTED`, `UNCERTAIN`, `RETIRED`, and `COMPLETED`. Provider-result transitions are only evaluated in tests; production has no AO receipt verifier, lookup, or transport. `SUBMITTING` never hands off transport. Session, Builder, branch, PR, and audit absence never establishes retirement. The legacy `reconcileAoSpawnIntents` export returns `EAO_RECONCILIATION_BLOCKED` without AO calls or state mutation.
+
+The state file uses a temporary file and atomic rename under controller ownership. Audit JSONL is appended separately after state persistence. A crash or audit failure can leave a state record without an audit event; state remains authoritative for local deduplication and no dispatch occurs. The two files are not one atomic transaction. The current writer does not fsync the file and directory, so power-loss durability is not guaranteed. Reports label dispatch receipt status unverified, including fixture evidence, and never interpret local intent as AO acceptance. The historical `issue12-phase2h-supervised-assignment` delivery remains unresolved and is not imported as a new dispatch.
+
 ## Commands
 
 ```bash

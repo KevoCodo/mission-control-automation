@@ -1,4 +1,4 @@
-export const STATE_VERSION = 2;
+export const STATE_VERSION = 3;
 export const MIN_SUPPORTED_STATE_VERSION = 1;
 
 export type ExecutionMode = 'dry-run';
@@ -65,6 +65,35 @@ export interface OperationRecord {
   updatedAt: string;
   outcome?: OperationOutcome;
   lastError?: string;
+}
+
+export type DispatchState = 'INTENT_RECORDED' | 'SUBMITTING' | 'ACCEPTED' | 'REJECTED' | 'UNCERTAIN' | 'RETIRED' | 'COMPLETED';
+export type DispatchEvidenceKind = 'acceptance' | 'rejection' | 'retirement' | 'outcome';
+export interface DispatchEvidence {
+  kind: DispatchEvidenceKind;
+  dispatchId: string;
+  providerReceiptRef: string;
+  provenance: 'fixture';
+  verified: true;
+  durable?: true;
+  observedAt: string;
+}
+export interface DispatchRecord {
+  version: 1;
+  dispatchId: string;
+  operationKey: string;
+  repository: { owner: string; name: string };
+  issueNumber: number;
+  branch: string;
+  target?: { targetId?: string; sessionId?: string };
+  payloadSha256: string;
+  correlationId: string;
+  createdAt: string;
+  updatedAt: string;
+  state: DispatchState;
+  providerReceiptRef?: string;
+  evidence?: DispatchEvidence;
+  quarantineReason?: string;
 }
 
 export interface StateSchemaMetadata {
@@ -305,6 +334,7 @@ export interface ControllerState {
   project: ProjectIdentity;
   identities: IdentityMap;
   operations: OperationRecord[];
+  dispatches: DispatchRecord[];
   discoveries: DiscoveryResult[];
   pullRequestTracking: PullRequestTrackingObservation[];
   nativeReviewTracking: NativeReviewObservation[];
