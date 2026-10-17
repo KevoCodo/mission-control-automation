@@ -84,6 +84,29 @@ export async function assignIssueWithAo(
   now = new Date()
 ): Promise<AssignmentResult> {
   const mode = request.mode ?? 'dry-run';
+  if (mode !== 'dry-run') {
+    try {
+      await appendAuditEvent(auditPath, {
+        type: 'assignment.dispatch.denied',
+        timestamp: now.toISOString(),
+        issueNumber: request.issue.number,
+        category: 'outcome',
+        authorization: 'denied',
+        outcome: 'failed',
+        provenance: { source: 'controller' },
+        data: { reason: 'TRUSTED_EXECUTION_BOUNDARY_UNAVAILABLE' }
+      });
+    } catch {
+      throw new AssignmentError(
+        'Live AO assignment was denied, but the denial audit event could not be written.',
+        'EAO_DENIAL_AUDIT_WRITE'
+      );
+    }
+    throw new AssignmentError(
+      'Live AO assignment is disabled: a trusted execution boundary is unavailable.',
+      'EAO_EXECUTION_BOUNDARY_UNAVAILABLE'
+    );
+  }
   assertTrustedAoAdapter(clients.ao.adapterName);
   const capabilities = await readRequiredCapabilities(clients);
   validateAoCapabilities(capabilities);

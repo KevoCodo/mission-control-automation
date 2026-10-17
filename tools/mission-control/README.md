@@ -7,7 +7,7 @@ GitHub issue, AO session, and pull request identities. It defaults to dry-run
 mode, uses fixture adapters unless trusted adapters are injected by a caller,
 and must not mutate GitHub, AO, branches, issues, sessions, or deployments.
 
-The library has a narrowly scoped AO assignment adapter for trusted callers; the bundled dry-run CLI does not invoke live spawning. The merge adapter is disabled. A plan, pending intent, CI result, or review verdict does not grant permission for a side effect.
+The exported AO assignment function denies every live request before calling an AO client, including injected clients. It records a controller-local `assignment.dispatch.denied` audit outcome and throws `EAO_EXECUTION_BOUNDARY_UNAVAILABLE`; it creates no spawn intent or session identity. Dry-run previews remain available. The bundled CLI does not invoke live spawning, and the merge adapter is disabled. A plan, pending intent, CI result, or review verdict does not grant permission for a side effect.
 
 ## Commands
 
