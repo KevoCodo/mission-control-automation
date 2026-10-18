@@ -1,5 +1,15 @@
 # AI Delivery Lab
 
+## Mission Control M2 supervised SDLC demo
+
+The first screen now follows fictional Epic `demo/sdlc-role-lab#201` and child #202 through Lead Orchestrator planning, Builder, Tester, PR Reviewer, Merger, and Lead closure review. It shows the stage, role, handoff instructions, reported work, findings, correction count, blockers, and next human action. The M1 single-issue planning screen remains below it.
+
+Approve the Epic plan, then explicitly approve each role handoff. Copy the role instructions and manually launch Codex in a separately authorized, independently checked worktree. Import a structured completion report after each external role finishes. The browser validates the report shape, exact commit and stage; it stores the report locally as a **user-supplied claim**, never as provider proof. A Tester or Reviewer failure returns to Builder for a manual correction, up to two correction cycles. A changed Builder commit invalidates old checks and requires fresh tests and review. Browser reload clears pending handoff approval.
+
+Merger preparation requires fresh local test and review reports and a PR URL in the completion report. The human checks the exact PR head and performs any merge through an approved external GitHub interface. The final Lead report keeps child and Epic completion **blocked / awaiting independent verification** because this browser has no authenticated GitHub provider evidence. A user-reported merge does not verify completion or close issues. Reset removes the local M2 record. No role starts, GitHub writes, AO calls, production execution, or deployment are implemented.
+
+M3 remains an actual supervised demonstration using a separately authorized disposable worktree and approved GitHub interface, with saved redacted evidence and independent source review. This fictional browser sequence is not that demonstration.
+
 ## Mission Control M1 manual handoff
 
 The React app opens on a single-operator Mission Control screen. Select one of two **fictional local demo issues** in `demo/manual-handoff-lab`, review its fixture-only details and dependencies, edit the template-derived plan, submit it, and explicitly approve it. Issue #102 has an unverified dependency, so approval is blocked. The existing task board remains available in a collapsed section.

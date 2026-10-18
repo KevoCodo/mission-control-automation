@@ -4,6 +4,7 @@ import { DashboardHeader } from './components/DashboardHeader';
 import { TaskBoard } from './components/TaskBoard';
 import { TaskSummary } from './components/TaskSummary';
 import { sampleTasks } from './data/tasks';
+import { SdlcDashboard } from './SdlcDashboard';
 import { approvePlan, cancelHandoff, editPlan, exactPlan, isApproved, newDraft, prepareHandoff,
   recordCopy, requestChanges, restoreDraft, selectIssue, type Draft, type Plan } from './workflow';
 
@@ -97,10 +98,12 @@ export function App() {
   function reset() { workflowRevision.current += 1; setDraft(null); setHandoff(''); setNotice('Demo draft reset.'); }
 
   return <main className="app-shell">
-    <header className="mvp-header"><div><p className="eyebrow">AI Delivery Lab / Mission Control</p><h1>Manual handoff</h1>
-      <p>One issue, one approved plan, one human-controlled Codex handoff.</p></div>
+    <header className="mvp-header"><div><p className="eyebrow">AI Delivery Lab / Mission Control</p><h1>Supervised delivery</h1>
+      <p>One fictional Epic, five human-controlled roles, and a visible evidence trail.</p></div>
       <span className="demo-badge">LOCAL DEMO DATA · NO LIVE GITHUB</span></header>
     <div className="safety-banner">Planning in this browser grants no production execution permission. Mission Control never launches Codex or AO.</div>
+    <SdlcDashboard />
+    <h2 className="m1-heading">M1 · Single issue planning</h2>
     <div className="workflow-grid">
       <section className="workflow-panel" aria-label="Issue selection">
         <div className="panel-heading"><span className="step">01</span><div><p className="eyebrow">Select</p><h2>Development issue</h2></div></div>

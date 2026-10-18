@@ -53,9 +53,9 @@ The PR #33 implementation was merged at `062bce956c0add05c4c7e3400714c45e3050985
 
 **M1: MVP workflow and persistence.** Connect existing issue/discovery and planning data to a simple single-task UI or existing CLI; add plan approval, explicit manual handoff generation, and safe locally persisted drafts. No new execution path.
 
-**M2: Evidence and PR handoff.** Allow user-controlled import of a patch/commit and test/review output; clearly label source provenance and unknowns; generate a PR description/checklist. No GitHub write permission or automatic merge.
+**M2: Supervised role workflow and evidence handoff.** The React demo now represents one fictional Epic and child through Lead Orchestrator, Builder, Tester, PR Reviewer, Merger, and Lead closure review. The browser generates distinct manual role instructions, requires a fresh human approval per handoff, validates structured user-supplied reports, tracks findings and at most two manual correction cycles, and invalidates checks after a changed commit. Merger and closure panels provide checklists and a human-readable completion report. The local demo cannot authenticate a PR, merge, or child completion; it remains awaiting independent verification. No Codex launch, AO access, GitHub write, automatic merge, or issue closure is enabled. M1 planning remains available.
 
-**M3: One end-to-end supervised demonstration.** Use a disposable issue/repo independent of AO. Run one manual Codex Builder cycle and at most two manually initiated corrections. Capture results, failure cases, tests, and a truthful demo report. This is a **separate supervised demonstration**, not closure of original live AO Issue #13.
+**M3: One end-to-end supervised demonstration.** Use a disposable issue/repo independent of AO. Manually run the approved external roles and at most two manually initiated corrections. Capture exact-head results, failure cases, tests, review, external merge and closure evidence, and a truthful demo report. This is a **separate supervised demonstration**, not closure of original live AO Issue #13. The M2 browser-only simulation does not fulfill M3.
 
 **Scope guard:** New work is MVP-critical only if it is necessary for these three deliverables or prevents unsafe claims/effects. Defer every other addition to post-MVP unless an actual tested blocker is identified.
 
