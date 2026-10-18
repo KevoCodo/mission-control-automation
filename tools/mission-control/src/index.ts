@@ -18,3 +18,6 @@ export * from './state.js';
 export * from './types.js';
 export * from './executionProtocol.js';
 export * from './supervisedAdmission.js';
+export * from './workerIdentity.js';
+export * from './workerIsolation.js';
+export * from './workerLifecycle.js';
