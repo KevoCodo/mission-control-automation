@@ -1,5 +1,7 @@
 # AI Delivery Lab
 
+**Current product direction (2026-10-18):** Prioritize a [manual supervised issue-to-PR MVP](docs/MVP_SCOPE_AND_ROADMAP.md), with a human-approved plan, manual external Codex handoff, user-imported test/review evidence, and a human-executed PR workflow. Automatic worker launching, production execution, live AO, and controller write/merge/close are not enabled. The older documentation checkpoint below is historical; the merged native build-preparation milestone is [PR #33](https://github.com/KevoCodo/ai-delivery-lab/pull/33) at `062bce956c0add05c4c7e3400714c45e3050985c`. Actual OS containment remains unverified.
+
 Documentation checkpoint: version 1, 2026-10-14, base `02d15718057ebe08264923b56b528bad3efbdf30` after merged Issues #4–#10. This repository contains an experimental Mission Control controller and a React/Vite sample task dashboard. The controller is not a production autonomous delivery service. Read the [living SOP](docs/MISSION_CONTROL_LIVING_SOP.md), [project journey](docs/PROJECT_JOURNEY_AND_LESSONS.md), and [technical controller README](tools/mission-control/README.md).
 
 A lightweight task management application foundation built with Vite, React,
