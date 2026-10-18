@@ -17,3 +17,4 @@ export * from './report.js';
 export * from './state.js';
 export * from './types.js';
 export * from './executionProtocol.js';
+export * from './supervisedAdmission.js';
