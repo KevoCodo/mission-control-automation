@@ -1,5 +1,13 @@
 # AI Delivery Lab
 
+## Mission Control M1 manual handoff
+
+The React app opens on a single-operator Mission Control screen. Select one of two **fictional local demo issues** in `demo/manual-handoff-lab`, review its fixture-only details and dependencies, edit the template-derived plan, submit it, and explicitly approve it. Issue #102 has an unverified dependency, so approval is blocked. The existing task board remains available in a collapsed section.
+
+Approval binds the exact plan text, issue, repository and version in the current browser session. Editing, changing issue, requesting changes or cancelling clears approval and any prepared handoff. Local storage keeps a draft, but restored approval is always removed and must be given again. Reset deletes the local draft. Browser storage is treated as untrusted and never supplies credentials or execution authority.
+
+An approved plan can produce copy-ready manual Codex instructions. Because the demo has no independently verified GitHub issue, separate worktree or Git baseline, the handoff labels those facts **unknown** and requires the human to verify them before external execution. Copying only changes the local status to “awaiting manual execution”; it does not launch, observe or authorize a worker. Live GitHub issue integration, evidence import and PR preparation are deferred beyond M1. Production execution gates remain disabled.
+
 **Current product direction (2026-10-18):** Prioritize a [manual supervised issue-to-PR MVP](docs/MVP_SCOPE_AND_ROADMAP.md), with a human-approved plan, manual external Codex handoff, user-imported test/review evidence, and a human-executed PR workflow. Automatic worker launching, production execution, live AO, and controller write/merge/close are not enabled. The older documentation checkpoint below is historical; the merged native build-preparation milestone is [PR #33](https://github.com/KevoCodo/ai-delivery-lab/pull/33) at `062bce956c0add05c4c7e3400714c45e3050985c`. Actual OS containment remains unverified.
 
 Documentation checkpoint: version 1, 2026-10-14, base `02d15718057ebe08264923b56b528bad3efbdf30` after merged Issues #4–#10. This repository contains an experimental Mission Control controller and a React/Vite sample task dashboard. The controller is not a production autonomous delivery service. Read the [living SOP](docs/MISSION_CONTROL_LIVING_SOP.md), [project journey](docs/PROJECT_JOURNEY_AND_LESSONS.md), and [technical controller README](tools/mission-control/README.md).

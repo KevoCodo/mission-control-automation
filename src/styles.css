@@ -232,3 +232,43 @@ h1 {
   }
 }
 
+.app-shell { width: min(1540px, calc(100% - 40px)); }
+.mvp-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 24px; }
+.mvp-header h1 { margin-bottom: 12px; }
+.mvp-header p:last-child { color: #50686c; margin-bottom: 0; }
+.demo-badge { padding: 10px 14px; border-radius: 999px; background: #dceee9; color: #155e53; font-size: .75rem; font-weight: 800; white-space: nowrap; }
+.safety-banner { padding: 15px 20px; margin-bottom: 24px; border-left: 4px solid #0f766e; border-radius: 6px; background: #e7f2f0; color: #244946; font-weight: 600; }
+.workflow-grid { display: grid; grid-template-columns: minmax(240px, .9fr) minmax(360px, 1.45fr) minmax(280px, 1fr); align-items: start; gap: 18px; }
+.workflow-panel { min-width: 0; padding: 24px; border: 1px solid #dce6ea; border-radius: 12px; background: white; box-shadow: 0 8px 28px rgba(16,35,38,.045); }
+.panel-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+.panel-heading .eyebrow { margin-bottom: 4px; }
+.panel-heading h2 { margin: 0; font-size: 1.3rem; }
+.step { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: #e1f1ed; color: #14685f; font-weight: 800; }
+.workflow-panel label { display: block; margin-bottom: 8px; color: #334c50; font-size: .86rem; font-weight: 700; }
+.workflow-panel select, .workflow-panel textarea { width: 100%; padding: 11px 12px; border: 1px solid #b9cbce; border-radius: 7px; background: white; color: #172e32; font: inherit; }
+.workflow-panel textarea { resize: vertical; line-height: 1.45; }
+.workflow-panel select:focus-visible, .workflow-panel textarea:focus-visible, .workflow-panel button:focus-visible { outline: 3px solid #5dbfb1; outline-offset: 2px; }
+.issue-details { margin-top: 26px; }
+.identity { color: #0e7066; font-size: .82rem; font-weight: 800; overflow-wrap: anywhere; }
+.issue-details h3 { line-height: 1.25; }
+.issue-details p, .status-panel > p { line-height: 1.5; }
+.issue-details dl { display: grid; grid-template-columns: 90px 1fr; gap: 10px 12px; margin: 22px 0; font-size: .86rem; }
+.issue-details dt { color: #63777b; font-weight: 700; }.issue-details dd { margin: 0; overflow-wrap: anywhere; }
+.warning { padding: 12px; border-radius: 7px; background: #fff3d8; color: #694d12; }
+.empty-copy, .source-note, .footnote { color: #5e7377; font-size: .88rem; line-height: 1.5; }
+.plan-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.plan-fields label { margin: 0; }.plan-fields textarea { margin-top: 8px; min-height: 78px; }
+.button-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.workflow-panel button { min-height: 40px; padding: 8px 13px; border: 1px solid #a9c7c1; border-radius: 7px; background: white; color: #19584f; font-weight: 700; cursor: pointer; }
+.workflow-panel button.primary-action { border: 0; color: white; background: #0f766e; box-shadow: none; }
+.workflow-panel button.danger-action { color: #9b3c38; border-color: #e5b9b5; }
+.workflow-panel button:disabled { opacity: .47; cursor: not-allowed; }
+.status-pill { display: inline-block; padding: 7px 11px; border-radius: 999px; background: #e6f2ef; color: #17665d; font-size: .8rem; font-weight: 800; text-transform: capitalize; }
+.status-panel h3 { font-size: .95rem; margin-top: 18px; }
+.handoff-block { margin-top: 26px; }.handoff-block textarea { margin: 8px 0 10px; font-size: .79rem; }
+.notice { padding: 11px 13px; margin-top: 16px; border-radius: 6px; background: #e9f1fa; color: #24495f; }
+.footnote { margin-top: 24px; }.text-action { margin-top: 22px; padding: 0; border: 0; background: transparent; color: #0f766e; font: inherit; font-weight: 700; cursor: pointer; }
+.legacy-dashboard { margin-top: 36px; border-top: 1px solid #dce6ea; }.legacy-dashboard .dashboard-header { margin-top: 28px; }
+@media (max-width: 1150px) { .workflow-grid { grid-template-columns: minmax(220px, 1fr) minmax(380px, 1.6fr); }.status-panel { grid-column: 1 / -1; } }
+@media (max-width: 700px) { .app-shell { width: min(100% - 24px, 1180px); }.mvp-header { flex-direction: column; }.demo-badge { white-space: normal; }.workflow-grid, .plan-fields { grid-template-columns: 1fr; }.status-panel { grid-column: auto; }.workflow-panel { padding: 18px; } }
+

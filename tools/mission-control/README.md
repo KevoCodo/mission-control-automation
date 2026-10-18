@@ -1,5 +1,7 @@
 # Mission Control
 
+The M1 React workflow is a separate browser-only manual planning and handoff UI. It uses fictional local issue fixtures and a deterministic template plan. It does not call this controller's AO assignment planner or discovery adapters, and it adds no live provider or execution capability. See the root README for use and limits.
+
 Documentation checkpoint: version 1, 2026-10-14, base `02d1571`. See the [living SOP](../../docs/MISSION_CONTROL_LIVING_SOP.md) and [root README](../../README.md).
 
 Mission Control is a read-only controller skeleton for coordinating explicit
