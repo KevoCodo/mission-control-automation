@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { advanceNativePrototype, type NativeEvent, type NativeStage } from '../nativeContainmentPrototype.js';
+import { advanceNativePrototype, parseDisposableHarnessResult, parseNativeObservation,
+  type NativeEvent, type NativeStage } from '../nativeContainmentPrototype.js';
 
 const base = () => ({ version: 1, source: 'LOCAL_NATIVE_CLAIM', receiptId: 'receipt-1',
   generation: 4, observedAt: '2026-10-18T00:00:00.000Z', processId: 100,
@@ -11,6 +12,38 @@ const run = (stage: NativeStage, event: NativeEvent, changes: Record<string, unk
   advanceNativePrototype(stage, event, { ...base(), ...changes }, gate, used);
 
 describe('disposable native containment claim model', () => {
+  it('parses exact disposable harness text without granting authority', () => {
+    expect(parseDisposableHarnessResult(
+      'result=LOCAL_DISPOSABLE_OBSERVATION pid=123 exit=0 job_member=1 termination_requested=0\r\n', '', 0))
+      .toMatchObject({ kind: 'LOCAL_CLAIM', processId: 123, authenticity: 'UNVERIFIED',
+        productionAuthorized: false, executable: false });
+    expect(parseDisposableHarnessResult('', 'result=FAIL_CLOSED step=IsProcessInJob win32=5\n', 1))
+      .toMatchObject({ kind: 'FAIL_CLOSED', osError: { api: 'IsProcessInJob', code: 5 },
+        productionAuthorized: false });
+    for (const [stdout, stderr, code] of [
+      ['result=LOCAL_DISPOSABLE_OBSERVATION pid=123 exit=0 job_member=1 termination_requested=0', '', 1],
+      ['result=LOCAL_DISPOSABLE_OBSERVATION pid=123 exit=0 job_member=0 termination_requested=0', '', 0],
+      ['result=LOCAL_DISPOSABLE_OBSERVATION pid=123 exit=0 job_member=1 termination_requested=0', 'warning', 0],
+      ['', 'cleanup_error=CloseHandle win32=6\nresult=FAIL_CLOSED step=EXIT_UNVERIFIED win32=1460', 1]
+    ] as const) expect(parseDisposableHarnessResult(stdout, stderr, code).kind).toBe('MALFORMED');
+  });
+  it('parses only exact local observation records', () => {
+    expect(parseNativeObservation(base())).toEqual(base());
+    expect(parseNativeObservation({ ...base(), osError: { api: 'CloseHandle', code: 6 } }))
+      .toMatchObject({ osError: { api: 'CloseHandle', code: 6 } });
+    expect(parseNativeObservation({ ...base(), termination: 'OBSERVED', extra: true })).toBeNull();
+    expect(parseNativeObservation({ ...base(), observedAt: 'not-a-time' })).toBeNull();
+  });
+  it('never accepts native errors or absent process observation as success', () => {
+    expect(run('CONTAINED', 'STARTED', { osError: { api: 'ResumeThread', code: 5 } }).reason)
+      .toBe('NATIVE_ERROR');
+    expect(run('EXITED', 'REQUEST_TERMINATION', { osError: { api: 'CloseHandle', code: 6 } }).reason)
+      .toBe('NATIVE_ERROR');
+    expect(run('RUNNING', 'PROCESS_EXITED', { processId: null, termination: 'OBSERVED' }).stage)
+      .toBe('CONTAINMENT_UNCERTAIN');
+    expect(run('TERMINATION_REQUESTED', 'TERMINATION_OBSERVED',
+      { processId: null, termination: 'OBSERVED' }).stage).toBe('CONTAINMENT_UNCERTAIN');
+  });
   it('orders local setup, start, exit, and termination claims without authorizing', () => {
     const cases: Array<[NativeStage, NativeEvent, NativeStage, Record<string, unknown>]> = [
       ['CREATED', 'JOB_ASSIGNED', 'CONTAINED', {}],

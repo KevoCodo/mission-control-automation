@@ -1,5 +1,4 @@
-// S2B-2B1 source skeleton. No child creation, command input, or production adapter.
-// Build manually with a reviewed Windows SDK compiler; never run from npm or CI.
+// S2B-2B2 disposable Job Object owner. Included by the single-purpose harness.
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <jobapi2.h>
@@ -25,19 +24,25 @@ class OwnedJob {
     limits.BasicLimitInformation.ActiveProcessLimit = 1;
     if (!SetInformationJobObject(handle_, JobObjectExtendedLimitInformation,
         &limits, sizeof(limits))) {
-      const DWORD error = GetLastError(); close();
+      const DWORD error = GetLastError();
+      Status cleanup = close();
+      if (!cleanup.ok) return cleanup;
       return {"SetInformationJobObject", error, false};
     }
     JOBOBJECT_EXTENDED_LIMIT_INFORMATION observed{};
     if (!QueryInformationJobObject(handle_, JobObjectExtendedLimitInformation,
         &observed, sizeof(observed), nullptr)) {
-      const DWORD error = GetLastError(); close();
+      const DWORD error = GetLastError();
+      Status cleanup = close();
+      if (!cleanup.ok) return cleanup;
       return {"QueryInformationJobObject", error, false};
     }
     constexpr DWORD required = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE | JOB_OBJECT_LIMIT_ACTIVE_PROCESS;
     if ((observed.BasicLimitInformation.LimitFlags & required) != required ||
         observed.BasicLimitInformation.ActiveProcessLimit != 1) {
-      close(); return {"QueryInformationJobObject", ERROR_INVALID_DATA, false};
+      Status cleanup = close();
+      if (!cleanup.ok) return cleanup;
+      return {"QueryInformationJobObject", ERROR_INVALID_DATA, false};
     }
     return {"QueryInformationJobObject", ERROR_SUCCESS, true};
   }
@@ -51,7 +56,7 @@ class OwnedJob {
     BOOL member = FALSE;
     if (!IsProcessInJob(process, handle_, &member))
       return {"IsProcessInJob", GetLastError(), false};
-    return {"IsProcessInJob", member ? ERROR_SUCCESS : ERROR_INVALID_DATA, member != FALSE};
+    return {"IsProcessInJob", static_cast<DWORD>(member ? ERROR_SUCCESS : ERROR_INVALID_DATA), member != FALSE};
   }
 
   Status terminate() noexcept {
@@ -61,7 +66,15 @@ class OwnedJob {
     return {"TerminateJobObject", ERROR_SUCCESS, true};
   }
 
-  void close() noexcept { if (handle_) { CloseHandle(handle_); handle_ = nullptr; } }
+  HANDLE get() const noexcept { return handle_; }
+
+  Status close() noexcept {
+    if (!handle_) return {"CloseHandle", ERROR_SUCCESS, true};
+    HANDLE handle = handle_;
+    handle_ = nullptr;
+    if (!CloseHandle(handle)) return {"CloseHandle", GetLastError(), false};
+    return {"CloseHandle", ERROR_SUCCESS, true};
+  }
 
  private:
   HANDLE handle_ = nullptr;

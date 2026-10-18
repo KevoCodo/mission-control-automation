@@ -3,6 +3,7 @@ node_modules/
 dist/
 coverage/
 *.tsbuildinfo
+tools/mission-control/native/build/
 .mission-control/
 .env
 .env.*

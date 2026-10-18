@@ -26,6 +26,35 @@ export interface NativePrototypeResult {
   productionAuthorized: false;
   executable: false;
 }
+export interface DisposableHarnessResult {
+  kind: 'LOCAL_CLAIM' | 'FAIL_CLOSED' | 'MALFORMED';
+  processId: number | null;
+  osError: { api: string; code: number } | null;
+  authenticity: 'UNVERIFIED';
+  productionAuthorized: false;
+  executable: false;
+}
+
+/** Parses text from a separately run disposable probe; it never authenticates it. */
+export function parseDisposableHarnessResult(stdout: unknown, stderr: unknown,
+  exitCode: unknown): DisposableHarnessResult {
+  const base = { authenticity: 'UNVERIFIED' as const, productionAuthorized: false as const,
+    executable: false as const };
+  const malformed = (): DisposableHarnessResult =>
+    ({ ...base, kind: 'MALFORMED', processId: null, osError: null });
+  if (typeof stdout !== 'string' || typeof stderr !== 'string' ||
+    !Number.isSafeInteger(exitCode) || Number(exitCode) < 0) return malformed();
+  const success = /^result=LOCAL_DISPOSABLE_OBSERVATION pid=([1-9][0-9]*) exit=0 job_member=1 termination_requested=0\r?\n?$/.exec(stdout);
+  if (exitCode === 0 && stderr === '' && success) {
+    const pid = Number(success[1]);
+    if (Number.isSafeInteger(pid)) return { ...base, kind: 'LOCAL_CLAIM', processId: pid, osError: null };
+  }
+  const failure = /^result=FAIL_CLOSED step=([A-Za-z][A-Za-z0-9_]*) win32=([0-9]+)\r?\n?$/.exec(stderr);
+  if (exitCode !== 0 && stdout === '' && failure && Number.isSafeInteger(Number(failure[2])))
+    return { ...base, kind: 'FAIL_CLOSED', processId: null,
+      osError: { api: failure[1], code: Number(failure[2]) } };
+  return malformed();
+}
 const result = (stage: NativeStage, reason: string): NativePrototypeResult => ({
   stage, reason, authenticity: 'UNVERIFIED', retryAllowed: false,
   productionAuthorized: false, executable: false
@@ -49,7 +78,11 @@ function data(value: unknown, keys: readonly string[]): Record<string, unknown> 
   return Object.fromEntries(keys.map(key => [key, descriptors[key].value]));
 }
 
-function parseObservation(value: unknown): NativeObservation | null {
+export function parseNativeObservation(value: unknown): NativeObservation | null {
+  try { return parseNativeObservationData(value); } catch { return null; }
+}
+
+function parseNativeObservationData(value: unknown): NativeObservation | null {
   const v = data(value, observationKeys);
   if (!v || v.version !== 1 || v.source !== 'LOCAL_NATIVE_CLAIM' || !receiptId(v.receiptId) ||
     !positive(v.generation) || typeof v.observedAt !== 'string' ||
@@ -91,12 +124,14 @@ export function advanceNativePrototype(stage: unknown, event: unknown,
   if (!gate || typeof gate.active !== 'boolean' || !positive(gate.generation))
     return result('CONTAINMENT_UNCERTAIN', 'INVALID_GATE');
   if (!validReceipts(usedReceipts)) return result('CONTAINMENT_UNCERTAIN', 'INVALID_RECEIPT_TRACKER');
-  const observation = parseObservation(observationInput);
+  const observation = parseNativeObservation(observationInput);
   if (!observation) return result('CONTAINMENT_UNCERTAIN', 'INVALID_NATIVE_RESULT');
   if (Set.prototype.has.call(usedReceipts, observation.receiptId))
     return result('CONTAINMENT_UNCERTAIN', 'REPLAYED_RECEIPT');
   if (observation.generation !== gate.generation)
     return result('CONTAINMENT_UNCERTAIN', 'STALE_GENERATION');
+  if (observation.osError !== null)
+    return result('CONTAINMENT_UNCERTAIN', 'NATIVE_ERROR');
   if (gate.active && (event === 'JOB_ASSIGNED' || event === 'STARTED'))
     return result('CONTAINMENT_UNCERTAIN', 'STOP_ACTIVE');
   if (event === 'SETUP_FAILED' || event === 'EVIDENCE_MISSING')
@@ -107,12 +142,14 @@ export function advanceNativePrototype(stage: unknown, event: unknown,
   if (event === 'STARTED' && stage === 'CONTAINED' && observation.jobOwned &&
     observation.containmentQueried && !observation.controllingHandleInherited)
     return result('RUNNING', 'LOCAL_START_CLAIM_ONLY');
-  if (event === 'PROCESS_EXITED' && stage === 'RUNNING' && observation.termination === 'OBSERVED')
+  if (event === 'PROCESS_EXITED' && stage === 'RUNNING' && observation.processId !== null &&
+    observation.termination === 'OBSERVED')
     return result('EXITED', 'LOCAL_EXIT_CLAIM_ONLY');
   if (event === 'REQUEST_TERMINATION' && ['CONTAINED', 'RUNNING', 'EXITED'].includes(stage as string))
     return result('TERMINATION_REQUESTED', 'LOCAL_TERMINATION_REQUEST');
   if (event === 'TERMINATION_OBSERVED' && stage === 'TERMINATION_REQUESTED' &&
-    observation.termination === 'OBSERVED' && observation.containmentQueried && observation.jobOwned)
+    observation.processId !== null && observation.termination === 'OBSERVED' &&
+    observation.containmentQueried && observation.jobOwned)
     return result('TERMINATED', 'LOCAL_TERMINATION_CLAIM_ONLY');
   return result('CONTAINMENT_UNCERTAIN', 'UNSUPPORTED_OR_UNPROVEN_TRANSITION');
   } catch {
