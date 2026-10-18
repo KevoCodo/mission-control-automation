@@ -21,3 +21,5 @@ export * from './supervisedAdmission.js';
 export * from './workerIdentity.js';
 export * from './workerIsolation.js';
 export * from './workerLifecycle.js';
+export * from './windowsFilesystemPreflight.js';
+export * from './trustedRunnerPreflight.js';
