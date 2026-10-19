@@ -36,6 +36,16 @@ export function SdlcDashboard() {
       <div className="sdlc-counter"><strong>{state.reports.filter(r => !r.stale).length}</strong><span>current role reports<br />user-supplied only</span></div></div>
     <div className="sdlc-steps" aria-label="Role stages">{roles.map((r,i) => <div className={`sdlc-step ${role === r ? 'current' : ''}`} key={r}>
       <span>{String(i + 1).padStart(2,'0')}</span><strong>{r}</strong><small>{stepState(state,r)}</small></div>)}</div>
+    <section className="sdlc-legend" aria-labelledby="sdlc-legend-heading">
+      <h3 id="sdlc-legend-heading">What the statuses mean</h3>
+      <dl className="sdlc-legend-list">
+        <div><dt>Pending</dt><dd>This step is not currently active and has no current valid report.</dd></div>
+        <div><dt>Awaiting human approval</dt><dd>A person must authorize the next manual handoff.</dd></div>
+        <div><dt>User-supplied claim</dt><dd>A result was reported, but it has not been independently verified.</dd></div>
+        <div><dt>Independently verified</dt><dd>Evidence has been checked against an authoritative source.</dd></div>
+      </dl>
+      <p>Mission Control does not independently verify evidence automatically.</p>
+    </section>
     <div className="sdlc-grid">
       <section className="workflow-panel"><p className="eyebrow">Epic map</p><h3>One child · ordered work</h3>
         <p><strong>#{demoEpic.children[0].number} {demoEpic.children[0].title}</strong></p>
