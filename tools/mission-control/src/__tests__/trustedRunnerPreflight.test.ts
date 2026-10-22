@@ -98,4 +98,13 @@ describe('S2B-1 trusted runner claim preflight', () => {
       expect(assessWindowsFilesystemIdentity({ ...v, candidate }).length).toBeGreaterThan(0);
     expect(assessWindowsFilesystemIdentity(v)).toEqual([]);
   });
+  it('checks claimed file IDs when root and candidate resolve to one location', () => {
+    const v = fixture().filesystem;
+    expect(assessWindowsFilesystemIdentity(v)).toEqual([]);
+    expect(assessWindowsFilesystemIdentity({ ...v, candidateFileId: 'different-file-123' }))
+      .toContain('FILE_IDENTITY_MISMATCH');
+    const child = `${root}\\child`;
+    expect(assessWindowsFilesystemIdentity({ ...v, candidate: child, resolvedCandidate: child,
+      candidateFileId: 'different-file-123', components: ['ORDINARY', 'ORDINARY'] })).toEqual([]);
+  });
 });

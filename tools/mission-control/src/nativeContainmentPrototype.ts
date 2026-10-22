@@ -1,3 +1,5 @@
+import { assessWindowsFilesystemIdentity } from './windowsFilesystemPreflight.js';
+
 /** Disposable fixture model only. It has no process creation or production adapter. */
 export type NativeStage = 'CREATED' | 'CONTAINED' | 'RUNNING' | 'EXITED' |
   'TERMINATION_REQUESTED' | 'TERMINATED' | 'CONTAINMENT_UNCERTAIN';
@@ -80,6 +82,49 @@ function data(value: unknown, keys: readonly string[]): Record<string, unknown> 
 
 export function parseNativeObservation(value: unknown): NativeObservation | null {
   try { return parseNativeObservationData(value); } catch { return null; }
+}
+
+/** Gate 2A source check. Every field is caller supplied; a complete claim is still unauthenticated. */
+export function assessNativeWorkerIsolation(value: unknown): {
+  locallyClaimedReady: boolean;
+  independentlyAuthenticated: false;
+  productionAuthorized: false;
+  executable: false;
+  reasons: string[];
+} {
+  const result = (reasons: string[], locallyClaimedReady = false) => ({ locallyClaimedReady,
+    independentlyAuthenticated: false as const, productionAuthorized: false as const,
+    executable: false as const, reasons });
+  try {
+    const input = data(value, ['host', 'observation', 'filesystem']);
+    if (!input) return result(['MALFORMED_ISOLATION_REQUEST']);
+    const host = data(input.host, ['jobListAtCreation', 'restrictedToken', 'handleInspection',
+      'effectiveAcl', 'networkPolicy']);
+    if (!host || Object.values(host).some(v => typeof v !== 'boolean'))
+      return result(['MALFORMED_HOST_CAPABILITIES']);
+    const reasons: string[] = [];
+    for (const [capability, supported] of Object.entries(host))
+      if (!supported) reasons.push(`HOST_${capability.toUpperCase()}_UNAVAILABLE`);
+    const observation = parseNativeObservation(input.observation);
+    if (!observation) reasons.push('MALFORMED_NATIVE_OBSERVATION');
+    else {
+      if (observation.osError) reasons.push('NATIVE_ERROR');
+      if (!observation.jobOwned || !observation.containmentQueried ||
+        observation.controllingHandleInherited || observation.processId === null)
+        reasons.push('JOB_CONTAINMENT_UNVERIFIED');
+      if (observation.identity !== 'VERIFIED') reasons.push('WORKER_IDENTITY_UNVERIFIED');
+      if (observation.restrictions !== 'APPLIED') reasons.push('WORKER_RESTRICTIONS_UNVERIFIED');
+    }
+    const filesystem = assessWindowsFilesystemIdentity(input.filesystem);
+    reasons.push(...filesystem);
+    // The existing native and filesystem formats contain no authenticated provenance,
+    // protected handle binding, or proof that these observations describe one process.
+    const locallyClaimedReady = reasons.length === 0;
+    reasons.push('INDEPENDENT_CONTAINMENT_EVIDENCE_MISSING');
+    return result(reasons, locallyClaimedReady);
+  } catch {
+    return result(['MALFORMED_ISOLATION_REQUEST']);
+  }
 }
 
 function parseNativeObservationData(value: unknown): NativeObservation | null {

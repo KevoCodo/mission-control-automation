@@ -47,18 +47,6 @@ class OwnedJob {
     return {"QueryInformationJobObject", ERROR_SUCCESS, true};
   }
 
-  // Reserved for a fixed, suspended disposable fixture only after a separately reviewed
-  // atomic creation strategy. This translation unit has no call site for assignment.
-  Status assignSuspendedFixture(HANDLE process) noexcept {
-    if (!handle_ || !process) return {"AssignProcessToJobObject", ERROR_INVALID_HANDLE, false};
-    if (!AssignProcessToJobObject(handle_, process))
-      return {"AssignProcessToJobObject", GetLastError(), false};
-    BOOL member = FALSE;
-    if (!IsProcessInJob(process, handle_, &member))
-      return {"IsProcessInJob", GetLastError(), false};
-    return {"IsProcessInJob", static_cast<DWORD>(member ? ERROR_SUCCESS : ERROR_INVALID_DATA), member != FALSE};
-  }
-
   Status terminate() noexcept {
     if (!handle_) return {"TerminateJobObject", ERROR_INVALID_HANDLE, false};
     if (!TerminateJobObject(handle_, 1)) return {"TerminateJobObject", GetLastError(), false};

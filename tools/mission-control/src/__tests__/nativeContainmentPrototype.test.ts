@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { advanceNativePrototype, parseDisposableHarnessResult, parseNativeObservation,
+import { advanceNativePrototype, assessNativeWorkerIsolation, parseDisposableHarnessResult, parseNativeObservation,
   type NativeEvent, type NativeStage } from '../nativeContainmentPrototype.js';
 
 const base = () => ({ version: 1, source: 'LOCAL_NATIVE_CLAIM', receiptId: 'receipt-1',
@@ -10,6 +10,73 @@ const base = () => ({ version: 1, source: 'LOCAL_NATIVE_CLAIM', receiptId: 'rece
 const run = (stage: NativeStage, event: NativeEvent, changes: Record<string, unknown> = {},
   gate = { active: false, generation: 4 }, used = new Set<string>()) =>
   advanceNativePrototype(stage, event, { ...base(), ...changes }, gate, used);
+const isolation = () => ({
+  host: { jobListAtCreation: true, restrictedToken: true, handleInspection: true,
+    effectiveAcl: true, networkPolicy: true },
+  observation: { ...base(), identity: 'VERIFIED', restrictions: 'APPLIED' },
+  filesystem: { workspaceRoot: 'E:\\worker\\root', candidate: 'E:\\worker\\root',
+    resolvedRoot: 'E:\\worker\\root', resolvedCandidate: 'E:\\worker\\root',
+    volumeId: 'volume-123', rootFileId: 'file-12345', candidateFileId: 'file-12345',
+    components: ['ORDINARY'] }
+});
+
+describe('Gate 2A native worker isolation claim boundary', () => {
+  it('cannot authenticate even a complete set of caller claims', () => {
+    expect(assessNativeWorkerIsolation(isolation())).toEqual({ locallyClaimedReady: true,
+      independentlyAuthenticated: false, productionAuthorized: false, executable: false,
+      reasons: ['INDEPENDENT_CONTAINMENT_EVIDENCE_MISSING'] });
+  });
+  it.each([
+    ['unsupported creation-time Job list', (v: ReturnType<typeof isolation>) => { v.host.jobListAtCreation = false; }, 'HOST_JOBLISTATCREATION_UNAVAILABLE'],
+    ['missing restricted token', (v: ReturnType<typeof isolation>) => { v.host.restrictedToken = false; }, 'HOST_RESTRICTEDTOKEN_UNAVAILABLE'],
+    ['missing handle inspection', (v: ReturnType<typeof isolation>) => { v.host.handleInspection = false; }, 'HOST_HANDLEINSPECTION_UNAVAILABLE'],
+    ['missing ACL enforcement', (v: ReturnType<typeof isolation>) => { v.host.effectiveAcl = false; }, 'HOST_EFFECTIVEACL_UNAVAILABLE'],
+    ['missing network policy', (v: ReturnType<typeof isolation>) => { v.host.networkPolicy = false; }, 'HOST_NETWORKPOLICY_UNAVAILABLE'],
+    ['missing Job membership', (v: ReturnType<typeof isolation>) => { v.observation.containmentQueried = false; }, 'JOB_CONTAINMENT_UNVERIFIED'],
+    ['missing worker identity', (v: ReturnType<typeof isolation>) => { v.observation.identity = 'UNAVAILABLE'; }, 'WORKER_IDENTITY_UNVERIFIED'],
+    ['missing restrictions', (v: ReturnType<typeof isolation>) => { v.observation.restrictions = 'UNAVAILABLE'; }, 'WORKER_RESTRICTIONS_UNVERIFIED'],
+    ['unknown reparse status', (v: ReturnType<typeof isolation>) => { v.filesystem.components = ['UNKNOWN']; }, 'REPARSE_POINT_UNVERIFIED'],
+    ['contradictory file IDs', (v: ReturnType<typeof isolation>) => { v.filesystem.candidateFileId = 'different-file-123'; }, 'FILE_IDENTITY_MISMATCH']
+  ])('%s denies local readiness', (_name, mutate, reason) => {
+    const v = isolation(); mutate(v);
+    expect(assessNativeWorkerIsolation(v)).toMatchObject({ locallyClaimedReady: false,
+      productionAuthorized: false, executable: false });
+    expect(assessNativeWorkerIsolation(v).reasons).toContain(reason);
+  });
+  it('rejects malformed requests and missing containment evidence', () => {
+    for (const v of [null, { ...isolation(), extra: true },
+      { ...isolation(), host: { jobListAtCreation: true } }])
+      expect(assessNativeWorkerIsolation(v).locallyClaimedReady).toBe(false);
+    expect(assessNativeWorkerIsolation({ ...isolation(), observation: null }).reasons)
+      .toContain('MALFORMED_NATIVE_OBSERVATION');
+    expect(assessNativeWorkerIsolation({ ...isolation(), filesystem: null }).reasons)
+      .toContain('MALFORMED_FILESYSTEM_IDENTITY');
+  });
+  it('rejects hostile component arrays without calling their methods or accessors', () => {
+    let calls = 0;
+    const forgedSome = Object.assign(['REPARSE'], { some: () => { calls++; return false; } });
+    const forgedIncludes = Object.assign(['REPARSE'], { includes: () => { calls++; return false; } });
+    const accessor = Object.defineProperty(['ORDINARY'], '0', {
+      configurable: true, enumerable: true, get: () => { calls++; return 'ORDINARY'; }
+    });
+    const extra = Object.defineProperty(['ORDINARY'], 'extra', { value: true });
+    const invalidPrototype = Object.setPrototypeOf(['ORDINARY'], null);
+    const malformed = 'MALFORMED_FILESYSTEM_IDENTITY';
+    for (const [components, expected] of [
+      [forgedSome, malformed], [forgedIncludes, malformed], [accessor, malformed],
+      [['ORDINARY', ,], malformed], [extra, malformed], [invalidPrototype, malformed],
+      [[42], malformed], [['REPARSE'], 'REPARSE_POINT_PRESENT']
+    ] as const) {
+      const v = isolation();
+      v.filesystem.components = components as never;
+      const assessed = assessNativeWorkerIsolation(v);
+      expect(assessed).toMatchObject({ locallyClaimedReady: false,
+        independentlyAuthenticated: false, productionAuthorized: false, executable: false });
+      expect(assessed.reasons).toContain(expected);
+    }
+    expect(calls).toBe(0);
+  });
+});
 
 describe('disposable native containment claim model', () => {
   it('parses exact disposable harness text without granting authority', () => {
