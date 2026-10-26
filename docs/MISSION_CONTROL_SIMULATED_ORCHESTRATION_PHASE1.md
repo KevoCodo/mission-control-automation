@@ -1,0 +1,15 @@
+# Mission Control simulated SDLC orchestration: Phase 1
+
+## Functional boundary
+
+`simulatedSdlcOrchestration.ts` coordinates one explicitly synthetic issue in memory. It validates a bounded plan and dependency fixture, computes the exact plan digest, waits for a separate human approval **fixture** bound to the issue, repository, generation and STOP epoch, then consumes explicit Lead, Builder, Tester and Reviewer fixture results. Role stages advance without another approval. Tester or Reviewer failure permits at most two correction generations. Each correction clears prior test and review evidence and requires a changed simulated commit identity. Missing, unknown, stale, conflicting, duplicate or replayed results block progression within one coordinator instance. A fresh instance initialized from the same synthetic fixture may accept the same approval and result fixtures again; no cross-instance replay prevention exists. STOP prevents later transitions. Transition history is deterministic local memory and is not durable recovery evidence.
+
+The module reuses existing repository/issue, role, generation, plan digest, STOP epoch, exact commit, correction budget and evidence concepts. It is deliberately isolated from the S1 admission gate, B2 dispatch ledger, B3A authorization, trusted Builder boundary and M2 browser handoff. It creates no competing production dispatch or authorization state. A local approval fixture is not an authenticated human grant; an explicit fixture `PASS` is not a real test or independent review.
+
+`PR_READY_AWAITING_HUMAN` means only that the scripted simulation ended. `prepareSyntheticPr()` returns a fixture-only summary with `actualPrExists: false`. It does not publish a PR, merge, close an issue, or assert production completion. Every snapshot has `productionAuthorized: false` and `executable: false`.
+
+## Adapter and verification boundary
+
+The built-in fixture adapter derives synthetic commit hashes and role result bindings from the current in-memory snapshot. It invokes no SDK, process, shell, filesystem, network, AO or GitHub service. Scripts must state each role outcome; there is no implicit passing test or review. Direct result submission exists only to test stale and contradictory evidence handling, and cannot trigger an external effect. The controller CLI and React interface are unchanged. At the maximum safe integer, STOP remains terminal without incrementing its epoch; a correction that cannot safely increment generation becomes `BLOCKED`. Neither path emits an unsafe integer or resumes role progression.
+
+Connecting real trusted execution later would require a separately reviewed adapter to the existing B2 identity and ledger, authenticated scoped grants and exact plan approval, an atomic STOP fence, trusted process containment, independently verified exact-head test and review receipts, durable ordered evidence and crash recovery. Phase 1 supplies none of these and grants no live execution authority. The supervised M2 manual handoff and all current default-deny boundaries remain in force.
