@@ -20,6 +20,7 @@ class State(TypedDict):
     index: int
     history: list[str]
     blocked_reason: str | None
+    current_commit: str
     production_authorized: bool
     executable: bool
 
@@ -46,6 +47,14 @@ def valid_issue(issue: Any) -> bool:
         and type(plan["steps"]) is list and 1 <= len(plan["steps"]) <= 5
         and all(type(s) is str and 0 < len(s.strip()) <= 300 for s in plan["steps"]))
 
+def plan_fingerprint(issue: dict) -> str:
+    bound = {"issueId": issue["issueId"], "issueNumber": issue["issueNumber"],
+        "repository": issue["repository"], "steps": issue["plan"]["steps"]}
+    return hashlib.sha256(json.dumps(bound, separators=(",", ":")).encode()).hexdigest()
+
+def valid_commit(value: Any) -> bool:
+    return type(value) is str and bool(re.fullmatch(r"[0-9a-f]{40}", value))
+
 def block(state: State, reason: str) -> dict:
     return {"stage": "BLOCKED", "blocked_reason": reason,
         "history": [*state["history"], "BLOCKED:" + reason],
@@ -57,12 +66,10 @@ def plan(state: State) -> dict:
         return block(state, "INVALID_SYNTHETIC_ISSUE")
     if type(state["results"]) is not list or len(state["results"]) > 16:
         return block(state, "INVALID_FIXTURE_RESULTS")
-    bound = {"issueId": issue["issueId"], "issueNumber": issue["issueNumber"],
-        "repository": issue["repository"], "steps": issue["plan"]["steps"]}
-    digest = hashlib.sha256(json.dumps(bound, separators=(",", ":")).encode()).hexdigest()
+    digest = plan_fingerprint(issue)
     return {"stage": "AWAITING_PLAN_APPROVAL", "plan_digest": digest,
         "generation": issue["generation"], "stop_epoch": issue["stopEpoch"],
-        "corrections": 0, "index": 0, "blocked_reason": None,
+        "corrections": 0, "index": 0, "blocked_reason": None, "current_commit": "",
         "history": ["FIXTURE_PLAN_READY"],
         "production_authorized": False, "executable": False}
 
@@ -98,11 +105,24 @@ def role(state: State) -> dict:
         "REVIEWER_RUNNING_SIMULATED": "REVIEWER"}.get(state["stage"])
     item = results[idx]
     if (not expected or type(item) is not dict
-        or set(item) != {"role", "outcome", "resultId"}
+        or set(item) != {"role", "outcome", "resultId", "repository", "issueId",
+            "issueNumber", "planDigest", "generation", "stopEpoch", "commit"}
         or item.get("role") != expected
         or item.get("outcome") not in ("PASS", "FAIL", "UNKNOWN")
-        or not valid_id(item.get("resultId"))):
+        or not valid_id(item.get("resultId")) or not valid_commit(item.get("commit"))):
         return block(state, "INVALID_ROLE_FIXTURE")
+    issue = state["issue"]
+    if (item["repository"] != issue["repository"] or item["issueId"] != issue["issueId"]
+        or type(item["issueNumber"]) is not int or item["issueNumber"] != issue["issueNumber"]
+        or item["planDigest"] != state["plan_digest"]
+        or type(item["generation"]) is not int or item["generation"] != state["generation"]
+        or type(item["stopEpoch"]) is not int or item["stopEpoch"] != state["stop_epoch"]):
+        return block(state, "STALE_ROLE_FIXTURE")
+    if expected == "BUILDER":
+        if item["commit"] == state["current_commit"]:
+            return block(state, "REUSED_BUILDER_COMMIT")
+    elif item["commit"] != state["current_commit"]:
+        return block(state, "MISMATCHED_ROLE_COMMIT")
     if item["resultId"] in state["history"]:
         return block(state, "DUPLICATE_FIXTURE")
     if item["outcome"] == "UNKNOWN":
@@ -110,6 +130,8 @@ def role(state: State) -> dict:
     if expected == "BUILDER" and item["outcome"] == "FAIL":
         return block(state, "BUILDER_FIXTURE_FAILED")
     update: dict = {"index": idx + 1, "production_authorized": False, "executable": False}
+    if expected == "BUILDER":
+        update["current_commit"] = item["commit"]
     if item["outcome"] == "FAIL":
         if state["corrections"] >= 2 or state["generation"] >= 2**53 - 1:
             return block(state, "CORRECTION_BUDGET_EXCEEDED")
@@ -136,7 +158,7 @@ def build_graph(checkpointer: Any):
 def new_fixture(issue: dict, results: list[dict]) -> State:
     return {"issue": issue, "results": results, "stage": "NEW",
         "plan_digest": "", "generation": 0, "stop_epoch": 0, "corrections": 0,
-        "index": 0, "history": [], "blocked_reason": None,
+        "index": 0, "history": [], "blocked_reason": None, "current_commit": "",
         "production_authorized": False, "executable": False}
 
 def approve_fixture(graph: Any, config: dict, waiting: dict):
