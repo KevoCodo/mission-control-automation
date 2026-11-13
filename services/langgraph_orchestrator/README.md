@@ -49,3 +49,10 @@ The exported recovery interface adds `stop_fixture(path, thread_id)`. It records
 The API is deliberately limited to **synthetic, serial, local experiments**. This is a terminal STOP *at the recovery interface*, not within arbitrary direct `graph.invoke` calls. It does **not** guarantee atomic order against concurrent `resume_fixture` calls or STOP racing with a resume, and cannot kill a process. Do not expose these helpers as a network service or connect them to real workers. The controller-owned durable fence, authenticated permissions, exact admission ordering and process-tree termination belong to Phase 2 / issue #9.
 
 Run `python -m pytest -q` to exercise restart, repeated STOP, denial, missing/tampered row, and complete-thread STOP cases. The stop tests use separate SQLite connections per operation, not full operating-system crash injection.
+
+
+## Phase 1C Issue #6: deny-only controller interface proposal
+
+`controller_contract.py` specifies a versioned, strict, **synthetic-only** request/decision shape. The TypeScript-side mirror is `tools/mission-control/src/langgraphFixtureContract.ts` and both languages have fixture tests for malformed requests, role/scope mismatch and a DENY-only response. Validating a request does **not** authorize it: even a well-formed request always yields `DENY` with `authoritative=false`, `productionAuthorized=false` and `executable=false`. There is no transport or execution adapter.
+
+See `docs/LANGGRAPH_CONTROLLER_CONTRACT_PHASE1C.md` for the mapping to existing B2/B3A/B3B protocols and unresolved authentication, atomic STOP, provider identity and replay protections. This is a proposal for future integration, not a working controller bridge.
