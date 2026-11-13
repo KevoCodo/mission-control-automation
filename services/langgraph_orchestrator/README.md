@@ -22,7 +22,7 @@ Graph input must contain one strictly marked synthetic issue with a bounded plan
 
 Outcomes are never assumed. Missing, unknown, mismatched and over-budget fixture results block progression. `PR_READY_AWAITING_HUMAN` means synthetic progression only; no PR exists.
 
-**Important gaps:** unlike the existing TypeScript simulator, this initial graph does not bind results to a specific commit SHA, verify evidence provenance, protect against durable cross-process replay, or implement an independently enforced STOP mechanism. It must not be connected to worker execution, GitHub writes or the production controller. Phase 1 requires dependency-backed tests and parity review before sign-off.
+**Important gaps:** fixture result identity and commit strings are compared by exact value, but are still untrusted caller claims. The graph does not independently verify evidence provenance, provide an authenticated authorization grant, or implement a real worker STOP mechanism. It must not be connected to worker execution, GitHub writes or the production controller. Phase 1 requires dependency-backed tests and parity review before sign-off.
 
 
 ## Phase 1B: durable fixture recovery (experimental)
@@ -39,4 +39,13 @@ from recovery import start_fixture, inspect_fixture, resume_fixture
 # resume_fixture("fixture.sqlite", "fixture-demo-1", plan_digest=..., generation=1, stop_epoch=0, approved=True)
 ```
 
-This is a **controlled synthetic replay experiment**, not safe autonomous recovery. The SQLite file and caller are not authenticated, concurrent execution is not fenced, and the simulated STOP epoch is only an input binding. There is no independent process-tree STOP, transactional authorization grant, verified identity, immutable audit trail, exact-commit evidence, or controller-backed admission. No real worker or GitHub side effect is connected. A checkpoint is not an authorization receipt. Keep fixture database files outside version control.
+This is a **controlled synthetic replay experiment**, not safe autonomous recovery. The SQLite file and caller are not authenticated, concurrent execution is not fenced, and the simulated STOP epoch is only an input binding. There is no independent process-tree STOP, transactional authorization grant, verified identity, immutable audit trail, authenticated exact-commit evidence, or controller-backed admission. No real worker or GitHub side effect is connected. A checkpoint is not an authorization receipt. Keep fixture database files outside version control.
+
+
+## Phase 1C Issue #5: persistent fixture STOP gate
+
+The exported recovery interface adds `stop_fixture(path, thread_id)`. It records an irreversible terminal STOP in a dedicated SQLite `fixture_stop_fence` row with one monotonic epoch increment. Repeated STOP calls are idempotent and do not increment again. `inspect_fixture` returns effective `STOPPED` and `waiting_for_approval: false` even if the underlying LangGraph checkpoint retains its previously interrupted approval. `resume_fixture` rejects stopped threads **before** accepting a stored approval. An absent or inconsistent ledger record fails closed. A thread ID remains reserved across failures and STOP.
+
+The API is deliberately limited to **synthetic, serial, local experiments**. This is a terminal STOP *at the recovery interface*, not within arbitrary direct `graph.invoke` calls. It does **not** guarantee atomic order against concurrent `resume_fixture` calls or STOP racing with a resume, and cannot kill a process. Do not expose these helpers as a network service or connect them to real workers. The controller-owned durable fence, authenticated permissions, exact admission ordering and process-tree termination belong to Phase 2 / issue #9.
+
+Run `python -m pytest -q` to exercise restart, repeated STOP, denial, missing/tampered row, and complete-thread STOP cases. The stop tests use separate SQLite connections per operation, not full operating-system crash injection.
