@@ -1,19 +1,21 @@
-"""Durable fixture-only checkpoint inspection and gated resume.
+"""Fixture-only SQLite checkpoints plus a persistent, terminal STOP record.
 
-This module has no worker adapters, OS process controls, or authenticated grants.
-Its STOP and replay checks protect only this synthetic test interface.
+STOP fences only the exported recovery helpers; it cannot stop running agents,
+secure concurrent graph writes, authenticate a caller, or authorize execution.
 """
 from __future__ import annotations
 
+import sqlite3
 from pathlib import Path
 from typing import Any
 
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.types import Command
 
-from graph import build_graph, new_fixture, valid_id
+from graph import build_graph, new_fixture, valid_id, valid_issue
 
 TERMINAL = {"BLOCKED", "STOPPED", "PR_READY_AWAITING_HUMAN"}
+MAX_EPOCH = 2**53 - 1
 
 
 class FixtureRecoveryError(ValueError):
@@ -29,7 +31,7 @@ def _config(thread_id: str) -> dict:
 def _database(path: str | Path) -> str:
     if not isinstance(path, (str, Path)) or not str(path).strip():
         raise FixtureRecoveryError("INVALID_CHECKPOINT_PATH")
-    # Local, disposable fixture data only. Do not accept this as a trusted storage boundary.
+    # Disposable local fixture data only; not a trusted filesystem boundary.
     p = Path(path)
     if not p.is_file() and not p.parent.is_dir():
         raise FixtureRecoveryError("CHECKPOINT_DIRECTORY_UNAVAILABLE")
@@ -52,44 +54,125 @@ def _waiting(snapshot: Any) -> bool:
     )
 
 
+# The STOP ledger is independent of LangGraph's interrupt checkpoint.
+# Do not infer an ACTIVE permission from an absent, damaged, or old record.
+def _ledger(conn: sqlite3.Connection) -> None:
+    conn.execute("""CREATE TABLE IF NOT EXISTS fixture_stop_fence (
+        thread_id TEXT PRIMARY KEY,
+        status TEXT NOT NULL CHECK (status IN ('ACTIVE','STOPPED')),
+        epoch INTEGER NOT NULL CHECK (epoch >= 0 AND epoch <= 9007199254740991)
+    )""")
+
+
+def _fence(conn: sqlite3.Connection, thread_id: str, state: dict) -> tuple[str, int]:
+    _ledger(conn)
+    row = conn.execute(
+        "SELECT status, epoch FROM fixture_stop_fence WHERE thread_id = ?", (thread_id,)
+    ).fetchone()
+    if row is None:
+        raise FixtureRecoveryError("MISSING_FIXTURE_STOP_FENCE")
+    status, epoch = row
+    baseline = state.get("stop_epoch")
+    if (status not in ("ACTIVE", "STOPPED") or type(epoch) is not int
+        or not 0 <= epoch <= MAX_EPOCH or type(baseline) is not int
+        or not 0 <= baseline <= MAX_EPOCH):
+        raise FixtureRecoveryError("INVALID_FIXTURE_STOP_FENCE")
+    if status == "ACTIVE" and epoch != baseline:
+        raise FixtureRecoveryError("STALE_FIXTURE_STOP_FENCE")
+    if status == "STOPPED" and (epoch <= baseline or epoch != baseline + 1):
+        raise FixtureRecoveryError("INVALID_FIXTURE_STOP_FENCE")
+    return status, epoch
+
+
 def start_fixture(path: str | Path, thread_id: str, issue: dict, results: list[dict]) -> dict:
-    """Start a NEW fixture thread. Never restart a known thread from initial input."""
+    """New fixture thread; reserve its fence identity before running the graph."""
     config = _config(thread_id)
-    with SqliteSaver.from_conn_string(_database(path)) as saver:
+    if not valid_issue(issue):
+        raise FixtureRecoveryError("INVALID_SYNTHETIC_ISSUE")
+    filename = _database(path)
+    with sqlite3.connect(filename, timeout=5) as conn:
+        _ledger(conn)
+        try:
+            conn.execute(
+                "INSERT INTO fixture_stop_fence(thread_id,status,epoch) VALUES (?, 'ACTIVE', ?)",
+                (thread_id, issue["stopEpoch"])
+            )
+        except sqlite3.IntegrityError as error:
+            raise FixtureRecoveryError("FIXTURE_THREAD_ALREADY_EXISTS") from error
+    # Reservation is deliberately NOT rolled back after graph failure: uncertain
+    # creation must never be retried automatically using the same identity.
+    with SqliteSaver.from_conn_string(filename) as saver:
         graph = build_graph(saver)
         if graph.get_state(config).values:
             raise FixtureRecoveryError("FIXTURE_THREAD_ALREADY_EXISTS")
-        state = graph.invoke(new_fixture(issue, results), config=config)
-        return dict(state)
+        return dict(graph.invoke(new_fixture(issue, results), config=config))
 
 
 def inspect_fixture(path: str | Path, thread_id: str) -> dict:
-    """Read the persisted workflow, including whether a real graph interrupt is pending."""
+    """Return effective terminal STOP even if LangGraph retains an old interrupt."""
     config = _config(thread_id)
-    with SqliteSaver.from_conn_string(_database(path)) as saver:
+    filename = _database(path)
+    with SqliteSaver.from_conn_string(filename) as saver:
         snapshot = _snapshot(build_graph(saver), config)
-        return {"stage": snapshot.values["stage"], "waiting_for_approval": _waiting(snapshot),
+        with sqlite3.connect(filename, timeout=5) as conn:
+            status, epoch = _fence(conn, thread_id, snapshot.values)
+        stopped = status == "STOPPED"
+        return {"stage": "STOPPED" if stopped else snapshot.values["stage"],
+                "waiting_for_approval": not stopped and _waiting(snapshot),
                 "plan_digest": snapshot.values["plan_digest"],
                 "generation": snapshot.values["generation"],
-                "stop_epoch": snapshot.values["stop_epoch"],
-                "blocked_reason": snapshot.values["blocked_reason"],
+                "stop_epoch": epoch,
+                "blocked_reason": "STOP_ACTIVE" if stopped else snapshot.values["blocked_reason"],
                 "production_authorized": False, "executable": False}
+
+
+def stop_fixture(path: str | Path, thread_id: str) -> dict:
+    """Persist a terminal STOP in the fixture ledger; repeated STOP is idempotent.
+
+    This does not terminate any process or atomically fence concurrent execution.
+    """
+    config = _config(thread_id)
+    filename = _database(path)
+    with SqliteSaver.from_conn_string(filename) as saver:
+        snapshot = _snapshot(build_graph(saver), config)
+        with sqlite3.connect(filename, timeout=5, isolation_level=None) as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            try:
+                status, epoch = _fence(conn, thread_id, snapshot.values)
+                if status != "STOPPED":
+                    if epoch >= MAX_EPOCH:
+                        raise FixtureRecoveryError("STOP_EPOCH_EXHAUSTED")
+                    epoch += 1
+                    conn.execute(
+                        "UPDATE fixture_stop_fence SET status='STOPPED', epoch=? WHERE thread_id=?",
+                        (epoch, thread_id)
+                    )
+                conn.commit()
+            except BaseException:
+                conn.rollback()
+                raise
+    return inspect_fixture(filename, thread_id)
 
 
 def resume_fixture(path: str | Path, thread_id: str, *, plan_digest: str,
                    generation: int, stop_epoch: int, approved: bool) -> dict:
-    """Explicit fixture resume; never infer approval from checkpoint presence.
+    """Resume a fixture interrupt only when the persistent STOP fence is active-safe.
 
-    Caller values bind a resume to the exact checkpoint. This is NOT authentication.
+    Not authenticated and not concurrency-safe against external direct graph calls.
     """
     config = _config(thread_id)
-    with SqliteSaver.from_conn_string(_database(path)) as saver:
+    filename = _database(path)
+    with SqliteSaver.from_conn_string(filename) as saver:
         graph = build_graph(saver)
         snapshot = _snapshot(graph, config)
         state = snapshot.values
+        with sqlite3.connect(filename, timeout=5) as conn:
+            status, epoch = _fence(conn, thread_id, state)
+        if status == "STOPPED":
+            raise FixtureRecoveryError("FIXTURE_STOPPED")
         if state["stage"] in TERMINAL or not _waiting(snapshot):
             raise FixtureRecoveryError("NO_PENDING_FIXTURE_APPROVAL")
-        if (state["plan_digest"], state["generation"], state["stop_epoch"]) != (
+        if (state["plan_digest"], state["generation"], epoch) != (
             plan_digest, generation, stop_epoch
         ):
             raise FixtureRecoveryError("STALE_FIXTURE_RESUME")
@@ -99,5 +182,5 @@ def resume_fixture(path: str | Path, thread_id: str, *, plan_digest: str,
             "kind": "HUMAN_APPROVAL_FIXTURE",
             "issueId": state["issue"]["issueId"],
             "planDigest": plan_digest, "generation": generation,
-            "stopEpoch": stop_epoch, "approved": approved
+            "stopEpoch": epoch, "approved": approved
         }), config=config))
