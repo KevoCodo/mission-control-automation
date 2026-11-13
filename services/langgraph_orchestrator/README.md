@@ -23,3 +23,20 @@ Graph input must contain one strictly marked synthetic issue with a bounded plan
 Outcomes are never assumed. Missing, unknown, mismatched and over-budget fixture results block progression. `PR_READY_AWAITING_HUMAN` means synthetic progression only; no PR exists.
 
 **Important gaps:** unlike the existing TypeScript simulator, this initial graph does not bind results to a specific commit SHA, verify evidence provenance, protect against durable cross-process replay, or implement an independently enforced STOP mechanism. It must not be connected to worker execution, GitHub writes or the production controller. Phase 1 requires dependency-backed tests and parity review before sign-off.
+
+
+## Phase 1B: durable fixture recovery (experimental)
+
+`recovery.py` uses a disposable on-disk SQLite checkpoint file to persist the LangGraph state and approval interrupt. Calls to `start_fixture`, `inspect_fixture` and `resume_fixture` reopen the database each time, simulating a fresh process. A thread ID must begin with `fixture-`. An already-known thread cannot be restarted from its initial input. Resuming requires an actual pending interrupt, matching plan digest, generation, and STOP epoch, and an explicit Boolean approval fixture. Completed or blocked threads reject repeated resume calls.
+
+Example using a Python interpreter in this directory:
+
+```python
+from recovery import start_fixture, inspect_fixture, resume_fixture
+# Supply a synthetic issue and explicit fixture-only role results.
+# start_fixture("fixture.sqlite", "fixture-demo-1", issue, results)
+# inspect_fixture("fixture.sqlite", "fixture-demo-1")
+# resume_fixture("fixture.sqlite", "fixture-demo-1", plan_digest=..., generation=1, stop_epoch=0, approved=True)
+```
+
+This is a **controlled synthetic replay experiment**, not safe autonomous recovery. The SQLite file and caller are not authenticated, concurrent execution is not fenced, and the simulated STOP epoch is only an input binding. There is no independent process-tree STOP, transactional authorization grant, verified identity, immutable audit trail, exact-commit evidence, or controller-backed admission. No real worker or GitHub side effect is connected. A checkpoint is not an authorization receipt. Keep fixture database files outside version control.
