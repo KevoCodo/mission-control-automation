@@ -6,7 +6,10 @@ import { assessExp00BuildProvenance, captureExp00FileSnapshot, createExp00BuildP
   type Exp00FileSample } from '../exp00BuildProvenance.js';
 import { EXP00_DISPOSABLE_ROOT } from '../windowsHostReadiness.js';
 
-vi.mock('node:fs/promises', () => ({ lstat: vi.fn(), open: vi.fn() }));
+vi.mock('node:fs/promises', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:fs/promises')>();
+  return { ...actual, lstat: vi.fn(), open: vi.fn() };
+});
 
 const root = EXP00_DISPOSABLE_ROOT;
 const sourceDir = win32.join(root, 'src', 'tools', 'mission-control', 'native');
