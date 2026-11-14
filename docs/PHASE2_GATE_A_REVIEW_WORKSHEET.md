@@ -34,6 +34,42 @@ This section records observed/reportable details to speed up the one required de
 
 Reviewer works from this worksheet, [isolation threat model](PHASE2_WORKER_ISOLATION_THREAT_MODEL.md), [Docker preflight](PHASE2_DOCKER_WSL2_PREFLIGHT.md), [fixture policy](PHASE2_DOCKER_FIXTURE_POLICY.md), and the Issue #7 acceptance criteria. Reviewer records independently verified facts and a scoped signature in the declaration below. If any required evidence or independent approval is missing, the **only** valid result remains NO-GO and Issue #7 stays open.
 
+## Proposed sealed-fixture isolation and observation design for reviewer decision
+
+**Proposal only. NOT approved; NO-GO.** This section resolves the *design choice* for Issue #7 without asserting a successful implementation or authorizing the Issue #8 experiment.
+
+### A. Workspace boundary and container configuration (design selection)
+
+For the **first sealed, non-AI fixture**, select **zero host bind mounts**. Use an in-container `/workspace` tmpfs (proposed 64 MiB, `uid=65532,gid=65532,mode=0700,nosuid,nodev,noexec`) and `/tmp` tmpfs (16 MiB, `nosuid,nodev,noexec`); other writable paths should be absent under a read-only root filesystem. No mapped `C:\`, `E:\`, home directory, repository, credential file, Docker/Podman socket, device or agent socket. This means there is **no host-side disposable bind-root path** to approve for this limited fixture. The reviewer must instead establish the actual *engine storage / WSL2 host containment boundary* and prove it does not expose other host projects or data. If the reviewer requires a host-side fixture root, **stop and revise the design**, name and verify it before GO. This choice does not revise the existing policy for future coding workers, which will need separately approved workspaces.
+
+For the baseline review, the inert adapter preview proposes fixed `User=65532:65532`, `Cmd=["/bin/true"]`, `NetworkMode=none`, `ReadonlyRootfs=true`, `CapDrop=["ALL"]`, `no-new-privileges`, no elevated namespaces or devices, CPU quota 2 cores, memory/swap 2 GiB, PID limit 64, and bounded logs. The operator's prior experiment reported `1000:1000`; that is **not** proof of this proposed `65532:65532` effective UID. The actual Docker settings and image support for the chosen UID must be checked before Gate A GO.
+
+**Image and binary:** The operator's `docker image inspect` reported `alpine@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5a48c71bf`, Linux/amd64, one layer `sha256:75f1d9657d880da5f75298e8f40e9928bb6e260c50d26f97af196845307e3064`, and image defaults `User=""`, `Cmd=["/bin/sh"]`. These are metadata observations only. Reviewer must independently verify that the reference is the exact platform artifact (including manifest/platform resolution where relevant), establish its provenance, and verify the specific `/bin/true` executable bytes and runtime dependencies. **No assumption that image metadata proves executable presence, integrity or effective runtime policy.** Do not use `alpine:latest` for a future approved run.
+
+### B. Independent observation design (required verification, not established capability)
+
+| Concern | Proposed source/evidence to evaluate | Reviewer acceptance requirement / failure action |
+| --- | --- | --- |
+| Container identity and start/exit/remove | Custodian-owned Docker Engine events and pre/post inspect, bound to immutable image, container ID, creation timestamp, and known fixture label | Record observer start before any approved launch; events alone do not prove OS containment; gaps, restarts or mismatch mean UNKNOWN/NO-GO |
+| Process tree and descendants | Separate **host-side/WSL2 kernel-level** cgroup membership and PID/start-time observation, independent of worker logs; compare against Docker lifecycle | Demonstrate actual accessibility/visibility in Docker Desktop's WSL2/VM boundary, reliably capture short-lived and reparented children, and prove no survivors; if the host observer cannot achieve this, reject Docker Desktop host for this test |
+| Filesystem and canary | Trusted host/mount identity observation and read-only denied-canary pre/post hashes (canary kept outside worker mount namespace) | Show no Windows drive mounts, no engine socket/devices, no writable host bind, and prevent symlink/mount-path escape; inability to verify is UNKNOWN/NO-GO |
+| Network, DNS and gateway | Independent reviewer-controlled namespace/routing/firewall configuration inspection plus host/WSL2 packet or socket observation | Prove `network=none` denies IPv4, IPv6, DNS, host gateway and unintended Unix sockets; packet silence alone is not sufficient |
+| Privileges and resources | Trusted effective Docker/OCI configuration, namespace/capability/seccomp observations and cgroup v2 CPU/memory/PID counters, plus tmpfs and log limits | Effective limits must match approved design; missing disk/output cap or indefinite execution means NO-GO |
+| STOP, deadline and cleanup | Trusted supervisor monotonic deadline and protected lifecycle ledger; independent host/cgroup verification after termination and explicit object removal | Controller-owned STOP/durable fencing is Issue #9; for the Issue #8 sealed fixture, agree separately scoped external STOP/abort and quarantine procedure. Do not trust success solely from `docker rm -f` |
+| Evidence integrity and observer loss | Custodian-owned append-only/restricted evidence location **outside the worker**, time correlation, observer health, event-loss counters and independent audit review | No worker write access; missing event, sensor restart, clock anomaly or incomplete lineage means NO-GO/quarantine; preserve records before cleanup |
+
+**No particular Docker Desktop/WSL2 observer has yet been shown to satisfy these requirements.** A proposed tool or Docker inspect output is not independently authenticated evidence. Reviewer's explicit acceptance of observer completeness and failure behavior is essential.
+
+### C. Gate A design review and experiment scope
+
+1. Confirm this host is appropriate despite shared Docker Desktop engine and existing ContextFlow workload. If shared-host risk is unacceptable, reject this candidate and require a distinct approved host. Do not alter ContextFlow containers.
+2. Independently verify OS/kernel/engine config, image/executable provenance, effective UID/capabilities and zero-host-bind plus tmpfs implementation feasibility.
+3. Identify, configure and validate reviewer-owned OS process and network observations, protected evidence collection and handling of sensor loss, including ISO-01 through ISO-12 anticipated tests. **No tests are launched within Issue #7.**
+4. Independently approve resource and cleanup strategy, exact fixed fixture, and a bounded scope to proceed to Issue #8, or record a NO-GO with reasons.
+5. Reviewer signs the declaration at the end of this worksheet, including identity, date, evidence references, risks, constraints and decision. Gate A GO authorizes **only** separately scheduled sealed-fixture tests, never Codex/AI workers, real repositories, GitHub writes, or controller grants.
+
+**Outstanding blockers:** reviewer-owned observer viability on Docker Desktop/WSL2; independent host non-overlap analysis; immutable fixture executable provenance; verified effective restrictions and quotas; signed scoped reviewer decision. Until all are resolved: **NO-GO**.
+
 ## Host selection and evidence record
 
 | Required reviewer finding | Recorded value / evidence link | Result |
