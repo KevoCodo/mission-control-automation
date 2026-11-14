@@ -3,6 +3,37 @@
 **Epic #3 / Issue #7. Status: NOT APPROVED. NO-GO.**  
 Companion to [Phase 2 isolation threat model](PHASE2_WORKER_ISOLATION_THREAT_MODEL.md). This worksheet is for a qualified **independent reviewer**. A completed questionnaire or passing CI does not establish containment and cannot authorize any worker to run.
 
+## Issue #7: candidate host evidence and exact outstanding findings (November 2026)
+
+**Status: operator-reported inventory; NOT independently verified. Gate A remains NO-GO.**
+This section records observed/reportable details to speed up the one required design review, not to approve execution.
+
+| Gate A category | Currently reported or proposed | Decision / evidence still required |
+| --- | --- | --- |
+| Host / engine identity | Windows workstation, Docker Desktop Linux context `desktop-linux`; client/server v29.2.1; WSL2, Linux kernel `6.18.58.1-microsoft-standard-WSL2`, cgroup v2, built-in seccomp | Reviewer independently corroborates host, Docker daemon endpoint/security settings, WSL2/Windows version and patch status |
+| Separation from other work | Existing ContextFlow containers/images on the *same Docker Desktop engine*; worker-test was removed | Reviewer must assess whether shared workstation/daemon and live client/project data meet the threat model; do not assume isolated host |
+| Exact disposable workspace | Gemini reported one workspace bind, but its canonical Windows source path, identity and mount rights were not provided; later adapter proposal uses only tmpfs | Choose **one** model and approved exact root: zero host binds with fixed in-memory workspace preferred for sealed fixture. Verify Windows/WSL mount boundary and root ancestry if any host bind remains |
+| Image and executable | Operator-reported SHA-256 `f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5a48c71bf`; Alpine `worker-test` previously used a mutable `alpine:latest` tag | Determine whether SHA is image ID, manifest digest, or something else; verify reviewed immutable image manifest/source and exact fixed executable digest; **do not** treat reported hex as approved image ref |
+| Least privilege | Gemini reports nonroot `1000:1000`, cap drop ALL, no-new-privileges and read-only root; current proposed policy specifies `65532:65532` | Settle UID/GID mismatch using verified image identity and inspect effective runtime, not just expected template |
+| Network | Gemini reports `NetworkMode=none` | Independently verify namespace and egress denial plan including IPv4, IPv6, DNS, gateway, host/Unix sockets and effective firewall behavior |
+| Credentials | Gemini reports no secret variables or mounts | Review effective env, image layers, host bind paths and sockets, especially Docker Desktop/WSL2 sharing |
+| Resource limits | Gemini reports 2 CPUs, 2 GiB, 64 PIDs and 10 MiB log cap; prototype proposes 300-second deadline and tmpfs limits | Approve enforceable independent watchdog, disk/output ceilings and evidence collection; Docker log cap alone does not bound workspace disk |
+| Process observer | None independently identified or verified; Docker inspect/exit code and successful `docker rm -f worker-test` do not prove process-tree absence | Name reviewer-controlled host/engine observer, required lineage fields, loss handling, protected evidence location, STOP/cleanup verification procedure |
+| Negative test plan | ISO-01 through ISO-12 documented in threat model | Reviewer accepts or rejects each scenario, expected denial, observer coverage, failure quarantine and cleanup design **before** any scoped fixture run |
+| Independent sign-off | No independent review declaration on record | Qualified independent reviewer supplies identity, date, bounded scope, evidence links, residual risks and signed GO/NO-GO |
+
+### Design decision required before a reviewer can sign
+
+- **Fixture test boundary:** Fixed, non-AI test program only. No Codex/Claude/LLM or generic shell executor.
+- **Workspace decision:** Prefer *no host bind mounts* for the first sealed fixture to avoid shared host files. If a host bind is necessary, record its exact absolute Windows path, verified identity, ACLs, ancestry and access restrictions first. The previous `C:\\path` placeholder is **not** an approved root.
+- **Observer decision:** A Docker object disappearance is insufficient; review process-ancestry and independent observer completeness and loss behavior.
+- **Host nonoverlap:** Because ContextFlow and other workloads exist on this machine, an independent reviewer must decide whether Docker Desktop/WSL2 is an acceptable test host, or whether a more isolated environment is required.
+- **Controller authority:** TypeScript remains sole trusted policy/admission authority. LangGraph never grants execution. No real worker or sealed fixture launch is authorized by this worksheet.
+
+### Handoff and exit
+
+Reviewer works from this worksheet, [isolation threat model](PHASE2_WORKER_ISOLATION_THREAT_MODEL.md), [Docker preflight](PHASE2_DOCKER_WSL2_PREFLIGHT.md), [fixture policy](PHASE2_DOCKER_FIXTURE_POLICY.md), and the Issue #7 acceptance criteria. Reviewer records independently verified facts and a scoped signature in the declaration below. If any required evidence or independent approval is missing, the **only** valid result remains NO-GO and Issue #7 stays open.
+
 ## Host selection and evidence record
 
 | Required reviewer finding | Recorded value / evidence link | Result |
